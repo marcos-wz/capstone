@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-capstone-dev
+  namespace: development
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-capstone-dev
+  template:
+    metadata:
+      labels:
+        app: api-capstone-dev
+    spec:
+      containers:
+      - name: api-capstone-dev
+        image: <Image>
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "200m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
