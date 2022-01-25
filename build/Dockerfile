@@ -24,6 +24,7 @@ RUN set -ex \
     && go get github.com/labstack/echo/v4 \
     # TESTING
     && go get github.com/stretchr/testify \
+    && go get github.com/stretchr/testify/mock \
     # VSCODE GO Extensions
 	&& go install golang.org/x/tools/gopls@latest \
     && go install github.com/uudashr/gopkgs/v2/cmd/gopkgs@latest \
