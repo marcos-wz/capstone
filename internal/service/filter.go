@@ -29,7 +29,7 @@ func NewFilter(repo reader) iFilter {
 	return &filter{repo}
 }
 
-// IMPLEMENTATION **************************************
+// IMPLEMENTATION ***************************************
 
 func (f *filter) FilterFruits(filter, value string) ([]entity.Fruit, error) {
 	fruits, errRepo := f.repo.ReadFruits()
