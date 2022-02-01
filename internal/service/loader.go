@@ -22,7 +22,7 @@ type loaderService struct {
 	repoWriter  writer
 }
 
-func NewLoader(f fetcher, w writer) iLoaderService {
+func NewLoaderService(f fetcher, w writer) iLoaderService {
 	return &loaderService{f, w}
 }
 
