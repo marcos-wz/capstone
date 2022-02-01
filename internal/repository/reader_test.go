@@ -36,7 +36,7 @@ func TestReader_ReadFruits(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			repo := NewReader(tc.filePath)
+			repo := NewReaderRepo(tc.filePath)
 			fruits, err := repo.ReadFruits()
 			assert.Equal(t, tc.err, fmt.Sprintf("%v", err))
 			if err == nil {
@@ -65,7 +65,7 @@ func TestReader_ParseFruit(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			r := &reader{}
+			r := &readerRepo{}
 			fruit, errs := r.parseFruitRecord(tc.recordParam)
 			t.Log("ERRORS:", errs)
 			// assert.Equal(t, tc.reponseErrs, errs)

@@ -4,7 +4,7 @@ import "github.com/marcos-wz/capstone/internal/entity"
 
 // DOMAIN ***********************************************
 
-type iLoader interface {
+type iLoaderService interface {
 	// Add new fruits in the repository, and returns total fruit inserted
 	LoadAPIFruits() (int, error)
 }
@@ -17,18 +17,18 @@ type writer interface {
 	WriteFruits(fruits []entity.Fruit) error
 }
 
-type loader struct {
+type loaderService struct {
 	repoFetcher fetcher
 	repoWriter  writer
 }
 
-func NewLoader(f fetcher, w writer) iLoader {
-	return &loader{f, w}
+func NewLoader(f fetcher, w writer) iLoaderService {
+	return &loaderService{f, w}
 }
 
 // IMPLEMENTATION ***************************************
 
-func (*loader) LoadAPIFruits() (int, error) {
+func (*loaderService) LoadAPIFruits() (int, error) {
 	// var totalInserted int
 	// var errCreate error
 	// fruits, err := fs.repo.FetchFruits()

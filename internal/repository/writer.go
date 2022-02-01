@@ -6,20 +6,20 @@ import (
 
 // DOMAIN ****************************************************
 
-type iWriteFruits interface {
+type iWriterFruitsRepo interface {
 	// Write new fruits records to the csv file
 	WriteFruits(fruits []entity.Fruit) error
 }
 
-type writeFruits struct{}
+type writerFruitsRepo struct{}
 
-func NewWriteFruits() iWriteFruits {
-	return &writeFruits{}
+func NewWriterFruitsRepo() iWriterFruitsRepo {
+	return &writerFruitsRepo{}
 }
 
 // IMPLEMENTATION ********************************************
 
-func (writeFruits) WriteFruits(fruits []entity.Fruit) error {
+func (writerFruitsRepo) WriteFruits(fruits []entity.Fruit) error {
 	// f, err := os.OpenFile(csvFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	// if err != nil {
 	// 	log.Println("ERROR:", err)

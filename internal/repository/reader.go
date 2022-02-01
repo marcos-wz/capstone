@@ -14,25 +14,25 @@ import (
 
 // DOMAIN ***********************************************
 
-type iReader interface {
+type iReaderRepo interface {
 	// Read all fruit records from the csv file
 	ReadFruits() ([]entity.Fruit, error)
 }
 
-type reader struct {
+type readerRepo struct {
 	filePath string
 }
 
-func NewReader(file string) iReader {
-	return &reader{file}
+func NewReaderRepo(file string) iReaderRepo {
+	return &readerRepo{file}
 }
 
 // IMPLEMENTATION **************************************
 
-func (r *reader) ReadFruits() ([]entity.Fruit, error) {
+func (rp *readerRepo) ReadFruits() ([]entity.Fruit, error) {
 	var parserErrs string
 	// File
-	f, err := os.Open(r.filePath)
+	f, err := os.Open(rp.filePath)
 	if err != nil {
 		log.Println("ERROR:", err)
 		return nil, err
@@ -55,10 +55,10 @@ func (r *reader) ReadFruits() ([]entity.Fruit, error) {
 		}
 		indexRecord++
 		// Add parsed fruit to the list
-		fruit, errs := r.parseFruitRecord(record)
+		fruit, errs := rp.parseFruitRecord(record)
 		// NOTE: How to treath parser errors ?
 		// 		Maybe it should return an map[string]error: 1) "file", 2) "parser" ?
-		errsStr, ok := r.validateParserRecordErrors(errs)
+		errsStr, ok := rp.validateParserRecordErrors(errs)
 		if errsStr != "" {
 			msgErr := fmt.Sprintf("Record(%d): %v", indexRecord, errsStr)
 			parserErrs += msgErr
@@ -75,7 +75,7 @@ func (r *reader) ReadFruits() ([]entity.Fruit, error) {
 // Formats errs array to string, indicating error field position and description
 // if error on ID field, return false
 // NOTE: Format json response ?
-func (*reader) validateParserRecordErrors(errs []error) (string, bool) {
+func (*readerRepo) validateParserRecordErrors(errs []error) (string, bool) {
 	var description string
 	valid := true
 	totalErrs := 0
@@ -95,7 +95,7 @@ func (*reader) validateParserRecordErrors(errs []error) (string, bool) {
 // Always returns a fruit instance and validates the value field
 // if an error is found, the default value is set
 // field error for each field, is returned by numeric/index array position
-func (*reader) parseFruitRecord(fields []string) (*entity.Fruit, []error) {
+func (*readerRepo) parseFruitRecord(fields []string) (*entity.Fruit, []error) {
 	fruit := &entity.Fruit{}
 	numFields := 10
 	// NOTE: check if dynamic legth make sense
