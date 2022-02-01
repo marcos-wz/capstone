@@ -14,5 +14,3 @@ type Fruit struct {
 	Country     string  `json:"country"`  // country imported from
 	CreateAt    time.Time
 }
-
-type Fruits []Fruit
