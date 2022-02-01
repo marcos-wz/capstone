@@ -12,13 +12,13 @@ func TestReader_ReadFruits(t *testing.T) {
 	var testCases = []struct {
 		name     string
 		filePath string
-		response *entity.Fruits
+		response []entity.Fruit
 		err      string
 	}{
 		{
 			"Should return valid fruit list",
 			"../../data/fruits-test-ok.csv",
-			&entity.Fruits{},
+			[]entity.Fruit{},
 			"<nil>",
 		},
 		{
@@ -30,7 +30,7 @@ func TestReader_ReadFruits(t *testing.T) {
 		{
 			"Should return valid fruit list, with parser error",
 			"../../data/fruits-test-error.csv",
-			&entity.Fruits{},
+			[]entity.Fruit{},
 			"parser error",
 		},
 	}
@@ -40,8 +40,8 @@ func TestReader_ReadFruits(t *testing.T) {
 			fruits, err := repo.ReadFruits()
 			assert.Equal(t, tc.err, fmt.Sprintf("%v", err))
 			if err == nil {
-				t.Log("Total fruits:", len(*fruits))
-				for _, f := range *fruits {
+				t.Log("Total fruits:", len(fruits))
+				for _, f := range fruits {
 					t.Logf("%+v", f)
 				}
 			}

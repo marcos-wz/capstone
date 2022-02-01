@@ -16,7 +16,7 @@ import (
 
 type iReader interface {
 	// Read all fruit records from the csv file
-	ReadFruits() (*entity.Fruits, error)
+	ReadFruits() ([]entity.Fruit, error)
 }
 
 type reader struct {
@@ -29,7 +29,7 @@ func NewReader(file string) iReader {
 
 // IMPLEMENTATION **************************************
 
-func (r *reader) ReadFruits() (*entity.Fruits, error) {
+func (r *reader) ReadFruits() ([]entity.Fruit, error) {
 	var parserErrs string
 	// File
 	f, err := os.Open(r.filePath)
@@ -41,7 +41,7 @@ func (r *reader) ReadFruits() (*entity.Fruits, error) {
 	// CSV
 	csvReader := csv.NewReader(f)
 	csvReader.FieldsPerRecord = -1
-	list := entity.Fruits{}
+	list := []entity.Fruit{}
 	// indexRecord indicates the number of row record, it is used for parser errors
 	indexRecord := 0
 	for {
@@ -49,9 +49,9 @@ func (r *reader) ReadFruits() (*entity.Fruits, error) {
 		// End of file, returns the parsed fruit records found in file
 		if err == io.EOF {
 			if parserErrs != "" {
-				return &list, fmt.Errorf("parser error: %v", parserErrs)
+				return list, fmt.Errorf("parser error: %v", parserErrs)
 			}
-			return &list, nil
+			return list, nil
 		}
 		indexRecord++
 		// Add parsed fruit to the list
