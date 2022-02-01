@@ -11,7 +11,7 @@ import (
 
 // DOMAIN ***********************************************
 
-type iFilter interface {
+type iFilterService interface {
 	// Get Filtered Fruits from the repository
 	FilterFruits(filter, value string) ([]entity.Fruit, error)
 }
@@ -21,17 +21,17 @@ type reader interface {
 	ReadFruits() ([]entity.Fruit, error)
 }
 
-type filter struct {
+type filterService struct {
 	repo reader
 }
 
-func NewFilter(repo reader) iFilter {
-	return &filter{repo}
+func NewFilterService(repo reader) iFilterService {
+	return &filterService{repo}
 }
 
 // IMPLEMENTATION ***************************************
 
-func (f *filter) FilterFruits(filter, value string) ([]entity.Fruit, error) {
+func (f *filterService) FilterFruits(filter, value string) ([]entity.Fruit, error) {
 	fruits, errRepo := f.repo.ReadFruits()
 	// ********************
 	// NOTE: fruits with parser errors
@@ -52,7 +52,7 @@ func (f *filter) FilterFruits(filter, value string) ([]entity.Fruit, error) {
 }
 
 // return fruits by filter, if not valid filter returns all fruits
-func (f *filter) filterFactory(fruits []entity.Fruit, filter, value string) ([]entity.Fruit, error) {
+func (f *filterService) filterFactory(fruits []entity.Fruit, filter, value string) ([]entity.Fruit, error) {
 	switch filter {
 	case "id":
 		id, err := strconv.Atoi(value)
@@ -77,7 +77,7 @@ func (f *filter) filterFactory(fruits []entity.Fruit, filter, value string) ([]e
 	}
 }
 
-func (*filter) filterByID(fruits []entity.Fruit, id int) []entity.Fruit {
+func (*filterService) filterByID(fruits []entity.Fruit, id int) []entity.Fruit {
 	filterdFruits := []entity.Fruit{}
 	for _, fruit := range fruits {
 		if fruit.ID == id {
@@ -87,7 +87,7 @@ func (*filter) filterByID(fruits []entity.Fruit, id int) []entity.Fruit {
 	return filterdFruits
 }
 
-func (*filter) filterByName(fruits []entity.Fruit, name string) []entity.Fruit {
+func (*filterService) filterByName(fruits []entity.Fruit, name string) []entity.Fruit {
 	filterdFruits := []entity.Fruit{}
 	for _, fruit := range fruits {
 		if strings.EqualFold(fruit.Name, name) {
@@ -97,7 +97,7 @@ func (*filter) filterByName(fruits []entity.Fruit, name string) []entity.Fruit {
 	return filterdFruits
 }
 
-func (*filter) filterByColor(fruits []entity.Fruit, color string) []entity.Fruit {
+func (*filterService) filterByColor(fruits []entity.Fruit, color string) []entity.Fruit {
 	filterdFruits := []entity.Fruit{}
 	for _, fruit := range fruits {
 		if strings.EqualFold(fruit.Color, color) {
@@ -107,7 +107,7 @@ func (*filter) filterByColor(fruits []entity.Fruit, color string) []entity.Fruit
 	return filterdFruits
 }
 
-func (*filter) filterByCountry(fruits []entity.Fruit, country string) []entity.Fruit {
+func (*filterService) filterByCountry(fruits []entity.Fruit, country string) []entity.Fruit {
 	filterdFruits := []entity.Fruit{}
 	for _, fruit := range fruits {
 		if strings.EqualFold(fruit.Country, country) {

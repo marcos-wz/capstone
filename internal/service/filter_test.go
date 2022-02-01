@@ -151,7 +151,7 @@ func TestFilterFruits(t *testing.T) {
 			mock := mockFilter{}
 			mock.On("ReadFruits").Return(tc.repoResp, tc.repoErr)
 			// SERVICE
-			service := NewFilter(&mock)
+			service := NewFilterService(&mock)
 			fruits, err := service.FilterFruits(tc.filter, tc.value)
 			assert.Equal(t, tc.err, err)
 			assert.Equal(t, tc.response, fruits)
