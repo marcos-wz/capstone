@@ -32,21 +32,20 @@ func NewFilterService(repo reader) iFilterService {
 // IMPLEMENTATION ***************************************
 
 func (f *filterService) FilterFruits(filter, value string) ([]entity.Fruit, error) {
-	fruits, errRepo := f.repo.ReadFruits()
-	// ********************
-	// NOTE: fruits with parser errors
-	// should return fruit valid fruit list, with default values and excluding invalid records?
-	// should i create a parser ERROR to type validation, inteast of string ?
-	if strings.Contains(fmt.Sprintf("%v", errRepo), "parser error:") {
-		filterdFruits, errFilter := f.filterFactory(fruits, filter, value)
-		if errFilter != nil {
-			return nil, errFilter
+	fruits, err := f.repo.ReadFruits()
+	if err != nil {
+		// ********************
+		// NOTE: fruits with parser errors
+		// should return fruit valid fruit list, with default values and excluding invalid records?
+		// should i create a parser ERROR to type validation, inteast of string ?
+		if strings.Contains(err.Error(), "parser error:") {
+			filterdFruits, errFilter := f.filterFactory(fruits, filter, value)
+			if errFilter != nil {
+				return nil, errFilter
+			}
+			return filterdFruits, err
 		}
-		return filterdFruits, errRepo
-	}
-	// ********************
-	if errRepo != nil {
-		return nil, errRepo
+		return nil, err
 	}
 	return f.filterFactory(fruits, filter, value)
 }
@@ -57,8 +56,8 @@ func (f *filterService) filterFactory(fruits []entity.Fruit, filter, value strin
 	case "id":
 		id, err := strconv.Atoi(value)
 		if err != nil {
-			err := fmt.Errorf("invalid ID filter: %v - %v", value, err)
-			log.Println("ERROR:", err)
+			err := fmt.Errorf("invalid ID filter(%v): %v", value, err)
+			log.Println("ERROR SERVICE:", err)
 			return nil, err
 		}
 		return f.filterByID(fruits, id), nil
@@ -71,8 +70,8 @@ func (f *filterService) filterFactory(fruits []entity.Fruit, filter, value strin
 	case "all":
 		return fruits, nil
 	default:
-		err := fmt.Errorf("invalid filter: %v - %v", filter, value)
-		log.Println("ERROR:", err)
+		err := fmt.Errorf("undefined filter(%v): %v", filter, value)
+		log.Println("ERROR SERVICE:", err)
 		return nil, err
 	}
 }
