@@ -155,6 +155,8 @@ func TestFilterFruits(t *testing.T) {
 			fruits, err := service.FilterFruits(tc.filter, tc.value)
 			assert.Equal(t, tc.err, err)
 			assert.Equal(t, tc.response, fruits)
+			t.Log("Filtered Error:", err)
+			t.Log("Fruits Filtered:", fruits)
 		})
 
 	}
