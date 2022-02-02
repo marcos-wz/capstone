@@ -5,7 +5,7 @@ import "github.com/marcos-wz/capstone/internal/entity"
 // DOMAIN ***********************************************
 
 type iLoaderService interface {
-	// Add new fruits in the repository, and returns total fruit inserted
+	// Add new fruits from external API in the repository, and returns total fruit inserted
 	LoadAPIFruits() (int, error)
 }
 
