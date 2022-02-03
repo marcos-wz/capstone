@@ -44,7 +44,7 @@ func (rp *readerRepo) ReadFruits() ([]entity.Fruit, error) {
 	csvReader.FieldsPerRecord = -1
 	list := []entity.Fruit{}
 	numRecord := 0 // counter record is used for parser error description
-	var parserRecordErrs []entity.ParseCVSFruitRecordError
+	parserRecordErrs := []entity.ParseCVSFruitRecordError{}
 	// Dynamic number of fruit entity struct
 	numFruitFields := reflect.TypeOf(entity.Fruit{}).NumField()
 	for {
