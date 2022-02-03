@@ -2,7 +2,9 @@ package repository
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
+	"time"
 
 	"github.com/marcos-wz/capstone/internal/entity"
 	"github.com/stretchr/testify/assert"
@@ -49,28 +51,64 @@ func TestReader_ReadFruits(t *testing.T) {
 	}
 }
 
-func TestReader_ParseFruit(t *testing.T) {
+func TestReader_ParseFruitRecord(t *testing.T) {
 	var testCases = []struct {
-		name        string
-		recordParam []string
-		reponse     *entity.Fruit
-		reponseErrs []error
+		name           string
+		recordParam    []string
+		numFieldsParam int
+		reponse        *entity.Fruit
+		errs           map[string]string
 	}{
 		{
 			"success, no errors",
-			[]string{"1", "test", "test description"},
-			&entity.Fruit{},
-			[]error{},
+			[]string{"1", "TestFruit", "Testing fruit", "green", "kg", "1", "1", "1", "Mexico", "2022-02-01T12:14:05-06:00"},
+			reflect.TypeOf(entity.Fruit{}).NumField(),
+			&entity.Fruit{
+				ID: 1, Name: "TestFruit", Description: "Testing fruit", Color: "green", Unit: "kg",
+				Price: 1, Stock: 1, Caducate: 1, Country: "Mexico", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local)},
+			map[string]string{},
+		},
+		{
+			"Should return ID error, strconv.Atoi: parsing invalid syntax",
+			[]string{"s", "TestFruit", "Testing fruit", "green", "kg", "1", "1", "1", "Mexico", "2022-02-01T12:14:05-06:00"},
+			reflect.TypeOf(entity.Fruit{}).NumField(),
+			&entity.Fruit{
+				ID: 0, Name: "TestFruit", Description: "Testing fruit", Color: "green", Unit: "kg",
+				Price: 1, Stock: 1, Caducate: 1, Country: "Mexico", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local),
+			},
+			map[string]string{"id": "strconv.Atoi: parsing \"s\": invalid syntax"},
+		},
+		{
+			"Should return ID error, zero value",
+			[]string{"0", "TestFruit", "Testing fruit", "green", "kg", "1", "1", "1", "Mexico", "2022-02-01T12:14:05-06:00"},
+			reflect.TypeOf(entity.Fruit{}).NumField(),
+			&entity.Fruit{
+				ID: 0, Name: "TestFruit", Description: "Testing fruit", Color: "green", Unit: "kg",
+				Price: 1, Stock: 1, Caducate: 1, Country: "Mexico", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local),
+			},
+			map[string]string{"id": "zero value error"},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			r := &readerRepo{}
-			fruit, errs := r.parseFruitRecord(tc.recordParam)
-			t.Log("ERRORS:", errs)
-			// assert.Equal(t, tc.reponseErrs, errs)
-			// assert.NotEmpty(t, tc.reponse, fruit)
-			t.Log("ParsedFruit:", fruit)
+			fruit, errs := r.parseFruitRecord(tc.recordParam, tc.numFieldsParam)
+			assert.Equal(t, len(tc.errs), len(errs))
+			if len(errs) > 0 {
+				for field, err := range errs {
+					if errTC, ok := tc.errs[field]; ok {
+						assert.EqualError(t, err, errTC)
+					} else {
+						t.Error("the key map should exists:", field)
+					}
+				}
+			} else {
+				assert.NotEmpty(t, fruit)
+			}
+			assert.Equal(t, tc.reponse, fruit)
+			// Debug ---------
+			// t.Log("Parser errors:", errs)
+			// t.Log("Parsed fruit:", fruit)
 		})
 	}
 }
