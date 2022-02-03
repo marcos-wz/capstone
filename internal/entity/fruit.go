@@ -12,5 +12,5 @@ type Fruit struct {
 	Stock       int     `json:"stock"`    // stock
 	Caducate    int     `json:"caducate"` // number days to the fruit be caducated
 	Country     string  `json:"country"`  // country imported from
-	CreateAt    time.Time
+	CreatedAt   time.Time
 }
