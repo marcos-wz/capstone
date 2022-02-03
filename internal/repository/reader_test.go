@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"testing"
@@ -57,7 +58,7 @@ func TestReader_ParseFruitRecord(t *testing.T) {
 		recordParam    []string
 		numFieldsParam int
 		reponse        *entity.Fruit
-		errs           map[string]string
+		errs           []entity.ParseFruitCSVError
 	}{
 		{
 			"success, no errors",
@@ -66,7 +67,7 @@ func TestReader_ParseFruitRecord(t *testing.T) {
 			&entity.Fruit{
 				ID: 1, Name: "TestFruit", Description: "Testing fruit", Color: "green", Unit: "kg",
 				Price: 1, Stock: 1, Caducate: 1, Country: "Mexico", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local)},
-			map[string]string{},
+			[]entity.ParseFruitCSVError{},
 		},
 		{
 			"Should return ID error, strconv.Atoi: parsing invalid syntax",
@@ -76,7 +77,9 @@ func TestReader_ParseFruitRecord(t *testing.T) {
 				ID: 0, Name: "TestFruit", Description: "Testing fruit", Color: "green", Unit: "kg",
 				Price: 1, Stock: 1, Caducate: 1, Country: "Mexico", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local),
 			},
-			map[string]string{"id": "strconv.Atoi: parsing \"s\": invalid syntax"},
+			[]entity.ParseFruitCSVError{
+				{Index: 0, Field: "ID", Error: errors.New("strconv.Atoi: parsing \"s\": invalid syntax")},
+			},
 		},
 		{
 			"Should return ID error, zero value",
@@ -86,29 +89,27 @@ func TestReader_ParseFruitRecord(t *testing.T) {
 				ID: 0, Name: "TestFruit", Description: "Testing fruit", Color: "green", Unit: "kg",
 				Price: 1, Stock: 1, Caducate: 1, Country: "Mexico", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local),
 			},
-			map[string]string{"id": "zero value error"},
+			[]entity.ParseFruitCSVError{
+				{Index: 0, Field: "ID", Error: errors.New("zero value error")},
+			},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			r := &readerRepo{}
-			fruit, errs := r.parseFruitRecord(tc.recordParam, tc.numFieldsParam)
+			fruit, errs := r.parseFruitCSV(tc.recordParam, tc.numFieldsParam)
 			assert.Equal(t, len(tc.errs), len(errs))
 			if len(errs) > 0 {
-				for field, err := range errs {
-					if errTC, ok := tc.errs[field]; ok {
-						assert.EqualError(t, err, errTC)
-					} else {
-						t.Error("the key map should exists:", field)
-					}
+				for i, e := range errs {
+					assert.EqualError(t, e.Error, tc.errs[i].Error.Error())
 				}
 			} else {
 				assert.NotEmpty(t, fruit)
 			}
 			assert.Equal(t, tc.reponse, fruit)
 			// Debug ---------
-			// t.Log("Parser errors:", errs)
-			// t.Log("Parsed fruit:", fruit)
+			t.Log("Parser errors:", errs)
+			t.Log("Parsed fruit:", fruit)
 		})
 	}
 }

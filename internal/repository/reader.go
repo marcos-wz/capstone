@@ -2,6 +2,7 @@ package repository
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -59,13 +60,19 @@ func (rp *readerRepo) ReadFruits() ([]entity.Fruit, error) {
 		}
 		numRecord++
 		// Add parsed fruit to the list
-		fruit, errs := rp.parseFruitRecord(record, numFruitFields)
+		fruit, errs := rp.parseFruitCSV(record, numFruitFields)
 		if len(errs) > 0 {
 			// Format to json
 			parserErrs += rp.parserErrorsToJson(numRecord, errs)
-			// Invalid ID records are ommited
-			if _, ok := errs["id"]; ok {
-				continue
+
+			// Validate required fields. If required field error exists, the record is ommited
+			// NOTE: this is a lost data error, should be important some actions
+			for _, err := range errs {
+				if err.Field == "ID" {
+					log.Println("REPO Parser ID ERROR:", err.Error)
+					// Take some logging actions
+					continue
+				}
 			}
 		}
 		list = append(list, *fruit)
@@ -78,59 +85,76 @@ func (rp *readerRepo) ReadFruits() ([]entity.Fruit, error) {
 // Params:
 //	- record : the string array record from csv file
 //	- numFields : the number of fruit entity struct fields
-func (*readerRepo) parseFruitRecord(record []string, numFields int) (*entity.Fruit, map[string]error) {
+func (*readerRepo) parseFruitCSV(record []string, numFields int) (*entity.Fruit, []entity.ParseFruitCSVError) {
 	fruit := &entity.Fruit{}
-	errs := make(map[string]error)
+	errs := []entity.ParseFruitCSVError{}
 	var err error
 	// Initial values
 	values := make([]string, numFields)
 	copy(values, record)
 	// VALIDATIONS
-	// ID, must be integer and non-zero value
+	// 0 - ID, must be integer and non-zero value
 	fruit.ID, err = strconv.Atoi(values[0])
 	if err != nil {
-		errs["id"] = err
+		// errs["id"] = err
+		errs = append(errs, entity.ParseFruitCSVError{
+			Index: 0, Field: "ID", Error: err,
+		})
 	} else {
 		if fruit.ID == 0 {
-			errs["id"] = errors.New("zero value error")
+			errs = append(errs, entity.ParseFruitCSVError{
+				Index: 0, Field: "ID", Error: errors.New("zero value error"),
+			})
 		}
 	}
-	// NAME
+	// 1 - NAME
 	fruit.Name = values[1]
-	// DESCRIPTION
+	// 2 - DESCRIPTION
 	fruit.Description = values[2]
-	// COLOR
+	// 3 - COLOR
 	fruit.Color = values[3]
-	// UNIT
+	// 4 - UNIT
 	fruit.Unit = values[4]
-	// PRICE
+	// 5 - PRICE
 	if fruit.Price, err = strconv.ParseFloat(values[5], 64); err != nil {
-		errs["price"] = err
+		errs = append(errs, entity.ParseFruitCSVError{
+			Index: 5, Field: "Price", Error: err,
+		})
 	}
-	// STOCK
+	// 6 - STOCK
 	if fruit.Stock, err = strconv.Atoi(values[6]); err != nil {
-		errs["stock"] = err
+		errs = append(errs, entity.ParseFruitCSVError{
+			Index: 6, Field: "Stock", Error: err,
+		})
 	}
-	// CADUCATE
+	// 7 - CADUCATE
 	if fruit.Caducate, err = strconv.Atoi(values[7]); err != nil {
-		errs["caducate"] = err
+		errs = append(errs, entity.ParseFruitCSVError{
+			Index: 7, Field: "Caducate", Error: err,
+		})
 	}
-	// COUNTRY
+	// 8 - COUNTRY
 	fruit.Country = values[8]
-	// CREATED AT
+	// 9 - CREATED AT
 	if fruit.CreatedAt, err = time.Parse(time.RFC3339, values[9]); err != nil {
-		errs["created_at"] = err
+		errs = append(errs, entity.ParseFruitCSVError{
+			Index: 9, Field: "CreatedAt", Error: err,
+		})
 	}
 	return fruit, errs
 }
 
-// Formats errs array to JSON string.
-// It indicates field error and description
-func (*readerRepo) parserErrorsToJson(index int, errs map[string]error) string {
+// Formats parser errors array to JSON.
+func (*readerRepo) parserErrorsToJson(index int, errs []entity.ParseFruitCSVError) string {
+
 	jsonResponse := fmt.Sprintf("{ %q : %d,[", "record", index)
-	for field, err := range errs {
-		jsonResponse += fmt.Sprintf("{ %q: %q },", field, err)
-	}
+
+	errsJson, _ := json.Marshal(errs)
+	log.Println(string(errsJson))
+
+	// for field, err := range errs {
+	// 	jsonResponse += fmt.Sprintf("{ %q: %q },", field, err)
+	// }
 	jsonResponse += "]}"
 	return jsonResponse
 }
