@@ -41,7 +41,7 @@ func TestReader_ReadFruits(t *testing.T) {
 			repo := NewReaderRepo(tc.filePath)
 			fruits, err := repo.ReadFruits()
 			assert.Equal(t, tc.err, fmt.Sprintf("%v", err))
-			if err == nil {
+			if len(fruits) > 0 {
 				t.Log("Total fruits:", len(fruits))
 				for _, f := range fruits {
 					t.Logf("%+v", f)
@@ -68,30 +68,30 @@ func TestReader_ParseFruitRecord(t *testing.T) {
 				Price: 1, Stock: 1, Caducate: 1, Country: "Mexico", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local)},
 			[]entity.ParseCSVFruitFieldError{},
 		},
-		// {
-		// 	"Should return ID error, strconv.Atoi: parsing invalid syntax",
-		// 	[]string{"s", "TestFruit", "Testing fruit", "green", "kg", "1", "1", "1", "Mexico", "2022-02-01T12:14:05-06:00"},
-		// 	reflect.TypeOf(entity.Fruit{}).NumField(),
-		// 	&entity.Fruit{
-		// 		ID: 0, Name: "TestFruit", Description: "Testing fruit", Color: "green", Unit: "kg",
-		// 		Price: 1, Stock: 1, Caducate: 1, Country: "Mexico", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local),
-		// 	},
-		// 	[]entity.ParseCSVFruitFieldError{
-		// 		{Index: 0, Field: "ID", Error: errors.New("strconv.Atoi: parsing \"s\": invalid syntax")},
-		// 	},
-		// },
-		// {
-		// 	"Should return ID error, zero value",
-		// 	[]string{"0", "TestFruit", "Testing fruit", "green", "kg", "1", "1", "1", "Mexico", "2022-02-01T12:14:05-06:00"},
-		// 	reflect.TypeOf(entity.Fruit{}).NumField(),
-		// 	&entity.Fruit{
-		// 		ID: 0, Name: "TestFruit", Description: "Testing fruit", Color: "green", Unit: "kg",
-		// 		Price: 1, Stock: 1, Caducate: 1, Country: "Mexico", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local),
-		// 	},
-		// 	[]entity.ParseCSVFruitFieldError{
-		// 		{Index: 0, Field: "ID", Error: errors.New("zero value error")},
-		// 	},
-		// },
+		{
+			"Should return ID error, strconv.Atoi: parsing invalid syntax",
+			[]string{"s", "TestFruit", "Testing fruit", "green", "kg", "1", "1", "1", "Mexico", "2022-02-01T12:14:05-06:00"},
+			reflect.TypeOf(entity.Fruit{}).NumField(),
+			&entity.Fruit{
+				ID: 0, Name: "TestFruit", Description: "Testing fruit", Color: "green", Unit: "kg",
+				Price: 1, Stock: 1, Caducate: 1, Country: "Mexico", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local),
+			},
+			[]entity.ParseCSVFruitFieldError{
+				{Index: 0, Field: "ID", Error: "strconv.Atoi: parsing \"s\": invalid syntax"},
+			},
+		},
+		{
+			"Should return ID error, zero value",
+			[]string{"0", "TestFruit", "Testing fruit", "green", "kg", "1", "1", "1", "Mexico", "2022-02-01T12:14:05-06:00"},
+			reflect.TypeOf(entity.Fruit{}).NumField(),
+			&entity.Fruit{
+				ID: 0, Name: "TestFruit", Description: "Testing fruit", Color: "green", Unit: "kg",
+				Price: 1, Stock: 1, Caducate: 1, Country: "Mexico", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local),
+			},
+			[]entity.ParseCSVFruitFieldError{
+				{Index: 0, Field: "ID", Error: "zero value error"},
+			},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
