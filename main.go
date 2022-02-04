@@ -25,13 +25,13 @@ func main() {
 	repo := repository.NewReaderRepo(csvFile)
 	svc := service.NewFilterService(repo)
 	ctrl := controller.NewFilterController(svc)
-	e.GET("/v1/fruit/:filter/:value", ctrl.GetFruitsFilter)
+	e.GET("/v1/fruit/:filter/:value", ctrl.FilterFruit)
 
 	e.GET("/v1/fruit/:filter/:value", func(c echo.Context) error {
 		repo := repository.NewReaderRepo(csvFile)
 		svc := service.NewFilterService(repo)
 		ctrl := controller.NewFilterController(svc)
-		return ctrl.GetFruitsFilter(c)
+		return ctrl.FilterFruit(c)
 	})
 
 	e.Logger.Fatal(e.Start(":8080"))
