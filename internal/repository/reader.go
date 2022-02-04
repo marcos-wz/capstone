@@ -51,7 +51,8 @@ func (rp *readerRepo) ReadFruits() ([]entity.Fruit, error) {
 		record, err := csvReader.Read()
 		// End of file, returns the parsed fruit records found in file
 		if err == io.EOF {
-			// if parser error exists, returns the fruits parsed list, with default values set
+			// if parser error exists, returns the fruits parsed list, with default values set and the error
+			// returned error is JSON format, with "parser error: " preffix
 			if len(parserRecordErrs) > 0 {
 				parserErrorsJson, _ := json.Marshal(parserRecordErrs)
 				return list, fmt.Errorf("parser error: %v", string(parserErrorsJson))
