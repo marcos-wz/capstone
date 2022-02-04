@@ -14,24 +14,24 @@ import (
 
 type iFilterController interface {
 	// Get fruits filtered from the service
-	GetFruitsFilter(c echo.Context) error
+	FilterFruit(c echo.Context) error
 }
 
-type filterSvc interface {
-	FilterFruits(filter, value string) ([]entity.Fruit, error)
+type filterService interface {
+	GetFilteredFruits(filter, value string) ([]entity.Fruit, error)
 }
 
 type filterController struct {
-	service filterSvc
+	service filterService
 }
 
-func NewFilterController(svc filterSvc) iFilterController {
+func NewFilterController(svc filterService) iFilterController {
 	return &filterController{svc}
 }
 
 // IMPLEMENTATION ********************************
 
-func (fc *filterController) GetFruitsFilter(c echo.Context) error {
+func (fc *filterController) FilterFruit(c echo.Context) error {
 	// Input Validation
 	p := &entity.FruitsFilterParams{
 		Filter: c.Param("filter"),
@@ -42,7 +42,7 @@ func (fc *filterController) GetFruitsFilter(c echo.Context) error {
 		return c.JSON(http.StatusUnprocessableEntity, err.Error())
 	}
 
-	fruits, err := fc.service.FilterFruits(p.Filter, p.Value)
+	fruits, err := fc.service.GetFilteredFruits(p.Filter, p.Value)
 	// Error response validation
 	if err != nil {
 
@@ -51,8 +51,8 @@ func (fc *filterController) GetFruitsFilter(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
-		// Repository parser error: partial content
 		// Return valid fruits and the parser error
+		// Repository parser error: partial content (lost data)
 		if strings.HasPrefix(err.Error(), "parser error:") {
 			return c.JSON(http.StatusPartialContent, &entity.FruitsFilterResponse{
 				Fruits:      fruits,
