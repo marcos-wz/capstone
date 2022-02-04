@@ -13,10 +13,9 @@ import (
 
 type iFilterService interface {
 	// Get Filtered Fruits from the repository
-	FilterFruits(filter, value string) ([]entity.Fruit, error)
+	GetFilteredFruits(filter, value string) ([]entity.Fruit, error)
 }
 
-// NOTE: reader or getter ?
 type reader interface {
 	ReadFruits() ([]entity.Fruit, error)
 }
@@ -31,26 +30,27 @@ func NewFilterService(repo reader) iFilterService {
 
 // IMPLEMENTATION ***************************************
 
-func (f *filterService) FilterFruits(filter, value string) ([]entity.Fruit, error) {
-	fruits, err := f.repo.ReadFruits()
-	if err != nil {
-		// ********************
-		// NOTE: fruits with parser errors
-		// should return fruit valid fruit list, with default values and excluding invalid records?
-		// should i create a parser ERROR to type validation, inteast of string ?
-		if strings.Contains(err.Error(), "parser error:") {
+func (f *filterService) GetFilteredFruits(filter, value string) ([]entity.Fruit, error) {
+	fruits, errRepo := f.repo.ReadFruits()
+
+	// Repository errors evaluations
+	if errRepo != nil {
+		// Parser error propagation,
+		// Return fruits with default values and/or ommited invalid records(lost data)
+		if strings.HasPrefix(errRepo.Error(), "parser error: ") {
 			filterdFruits, errFilter := f.filterFactory(fruits, filter, value)
 			if errFilter != nil {
 				return nil, errFilter
 			}
-			return filterdFruits, err
+			return filterdFruits, errRepo
 		}
-		return nil, err
+		// Default repository error
+		return nil, errRepo
 	}
 	return f.filterFactory(fruits, filter, value)
 }
 
-// return fruits by filter, if not valid filter returns all fruits
+// return fruits by filter, if not valid filter returns 0
 func (f *filterService) filterFactory(fruits []entity.Fruit, filter, value string) ([]entity.Fruit, error) {
 	switch filter {
 	case "id":
@@ -71,11 +71,12 @@ func (f *filterService) filterFactory(fruits []entity.Fruit, filter, value strin
 		return fruits, nil
 	default:
 		err := fmt.Errorf("undefined filter(%v): %v", filter, value)
-		log.Println("ERROR SERVICE:", err)
+		log.Println("ERROR Service:", err)
 		return nil, err
 	}
 }
 
+// Return filtered fruits records by ID
 func (*filterService) filterByID(fruits []entity.Fruit, id int) []entity.Fruit {
 	filterdFruits := []entity.Fruit{}
 	for _, fruit := range fruits {
@@ -86,6 +87,7 @@ func (*filterService) filterByID(fruits []entity.Fruit, id int) []entity.Fruit {
 	return filterdFruits
 }
 
+//  Return filtered fruits records by Name
 func (*filterService) filterByName(fruits []entity.Fruit, name string) []entity.Fruit {
 	filterdFruits := []entity.Fruit{}
 	for _, fruit := range fruits {
@@ -96,6 +98,7 @@ func (*filterService) filterByName(fruits []entity.Fruit, name string) []entity.
 	return filterdFruits
 }
 
+//  Return filtered fruits records by Color
 func (*filterService) filterByColor(fruits []entity.Fruit, color string) []entity.Fruit {
 	filterdFruits := []entity.Fruit{}
 	for _, fruit := range fruits {
@@ -106,6 +109,7 @@ func (*filterService) filterByColor(fruits []entity.Fruit, color string) []entit
 	return filterdFruits
 }
 
+//  Return filtered fruits records by Country
 func (*filterService) filterByCountry(fruits []entity.Fruit, country string) []entity.Fruit {
 	filterdFruits := []entity.Fruit{}
 	for _, fruit := range fruits {
