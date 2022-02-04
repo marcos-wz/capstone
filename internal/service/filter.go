@@ -16,15 +16,15 @@ type iFilterService interface {
 	GetFilteredFruits(filter, value string) ([]entity.Fruit, error)
 }
 
-type reader interface {
+type readerRepo interface {
 	ReadFruits() ([]entity.Fruit, error)
 }
 
 type filterService struct {
-	repo reader
+	repo readerRepo
 }
 
-func NewFilterService(repo reader) iFilterService {
+func NewFilterService(repo readerRepo) iFilterService {
 	return &filterService{repo}
 }
 
@@ -32,7 +32,6 @@ func NewFilterService(repo reader) iFilterService {
 
 func (f *filterService) GetFilteredFruits(filter, value string) ([]entity.Fruit, error) {
 	fruits, errRepo := f.repo.ReadFruits()
-
 	// Repository errors evaluations
 	if errRepo != nil {
 		// Parser error propagation,
