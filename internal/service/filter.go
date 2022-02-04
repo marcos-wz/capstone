@@ -13,7 +13,7 @@ import (
 
 type iFilterService interface {
 	// Get Filtered Fruits from the repository
-	GetFilteredFruits(filter, value string) ([]entity.Fruit, error)
+	GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, error)
 }
 
 type readerRepo interface {
@@ -30,14 +30,14 @@ func NewFilterService(repo readerRepo) iFilterService {
 
 // IMPLEMENTATION ***************************************
 
-func (f *filterService) GetFilteredFruits(filter, value string) ([]entity.Fruit, error) {
+func (f *filterService) GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, error) {
 	fruits, errRepo := f.repo.ReadFruits()
 	// Repository errors evaluations
 	if errRepo != nil {
 		// Parser error propagation,
 		// Return fruits with default values and/or ommited invalid records(lost data)
 		if strings.HasPrefix(errRepo.Error(), "parser error: ") {
-			filterdFruits, errFilter := f.filterFactory(fruits, filter, value)
+			filterdFruits, errFilter := f.filterFactory(fruits, filter)
 			if errFilter != nil {
 				return nil, errFilter
 			}
@@ -46,30 +46,30 @@ func (f *filterService) GetFilteredFruits(filter, value string) ([]entity.Fruit,
 		// Default repository error
 		return nil, errRepo
 	}
-	return f.filterFactory(fruits, filter, value)
+	return f.filterFactory(fruits, filter)
 }
 
 // return fruits by filter, if not valid filter returns 0
-func (f *filterService) filterFactory(fruits []entity.Fruit, filter, value string) ([]entity.Fruit, error) {
-	switch filter {
+func (f *filterService) filterFactory(fruits []entity.Fruit, filter *entity.FruitsFilterParams) ([]entity.Fruit, error) {
+	switch filter.Filter {
 	case "id":
-		id, err := strconv.Atoi(value)
+		id, err := strconv.Atoi(filter.Value)
 		if err != nil {
-			err := fmt.Errorf("invalid ID filter(%v): %v", value, err)
+			err := fmt.Errorf("invalid ID filter(%v): %v", filter.Value, err)
 			log.Println("ERROR SERVICE:", err)
 			return nil, err
 		}
 		return f.filterByID(fruits, id), nil
 	case "name":
-		return f.filterByName(fruits, value), nil
+		return f.filterByName(fruits, filter.Value), nil
 	case "color":
-		return f.filterByColor(fruits, value), nil
+		return f.filterByColor(fruits, filter.Value), nil
 	case "country":
-		return f.filterByCountry(fruits, value), nil
+		return f.filterByCountry(fruits, filter.Value), nil
 	case "all":
 		return fruits, nil
 	default:
-		err := fmt.Errorf("undefined filter(%v): %v", filter, value)
+		err := fmt.Errorf("undefined filter(%v): %v", filter.Filter, filter.Value)
 		log.Println("ERROR Service:", err)
 		return nil, err
 	}

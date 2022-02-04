@@ -32,8 +32,7 @@ var mockFruitsData = []entity.Fruit{
 func TestFilter_FilterFruits(t *testing.T) {
 	var testCases = []struct {
 		name     string
-		filter   string
-		value    string
+		filter   *entity.FruitsFilterParams
 		repoResp []entity.Fruit
 		repoErr  error
 		response []entity.Fruit
@@ -41,7 +40,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 	}{
 		{
 			"Should return the fruit filtered by ID, no errors",
-			"id", "1",
+			&entity.FruitsFilterParams{Filter: "id", Value: "1"},
 			mockFruitsData,
 			nil,
 			[]entity.Fruit{
@@ -51,7 +50,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 		},
 		{
 			"Should return error, Invalid Filter ID: invalid syntax",
-			"id", "badvalue",
+			&entity.FruitsFilterParams{Filter: "id", Value: "badvalue"},
 			mockFruitsData,
 			nil,
 			nil,
@@ -59,7 +58,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 		},
 		{
 			"Should return the fruit filtered by NAME, no errors",
-			"name", "pera",
+			&entity.FruitsFilterParams{Filter: "name", Value: "pera"},
 			mockFruitsData,
 			nil,
 			[]entity.Fruit{{ID: 3, Name: "Pera", Country: "usa", Color: "Green"}},
@@ -67,7 +66,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 		},
 		{
 			"Should return the fruit filtered by COLOR, no errors",
-			"color", "yellow",
+			&entity.FruitsFilterParams{Filter: "color", Value: "yellow"},
 			mockFruitsData,
 			nil,
 			[]entity.Fruit{
@@ -78,7 +77,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 		},
 		{
 			"Should return the fruit filtered by COUNTRY, no errors",
-			"country", "USA",
+			&entity.FruitsFilterParams{Filter: "country", Value: "USA"},
 			mockFruitsData,
 			nil,
 			[]entity.Fruit{
@@ -89,7 +88,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 		},
 		{
 			"Should return all fruits, no errors",
-			"all", "",
+			&entity.FruitsFilterParams{Filter: "all", Value: ""},
 			mockFruitsData,
 			nil,
 			[]entity.Fruit{
@@ -102,7 +101,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 		},
 		{
 			"Should return error, Invalid Filter: undefined filter",
-			"badfilter", "badvalue",
+			&entity.FruitsFilterParams{Filter: "badfilter", Value: "badvalue"},
 			mockFruitsData,
 			nil,
 			nil,
@@ -111,7 +110,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 		// Repository error: no such file
 		{
 			"Should return repository error, open : no such file or directory",
-			"id", "1",
+			&entity.FruitsFilterParams{Filter: "id", Value: "1"},
 			nil,
 			fmt.Errorf("open : no such file or directory"),
 			nil,
@@ -120,7 +119,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 		// Repository error: parser error
 		{
 			"Should return repository error, parser error:",
-			"id", "1",
+			&entity.FruitsFilterParams{Filter: "id", Value: "1"},
 			mockFruitsData,
 			fmt.Errorf("parser error: "),
 			[]entity.Fruit{
@@ -136,7 +135,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 			mock.On("ReadFruits").Return(tc.repoResp, tc.repoErr)
 			// SERVICE
 			service := NewFilterService(&mock)
-			fruits, err := service.GetFilteredFruits(tc.filter, tc.value)
+			fruits, err := service.GetFilteredFruits(tc.filter)
 			assert.Equal(t, tc.err, err)
 			assert.Equal(t, tc.response, fruits)
 			if len(fruits) > 0 {
