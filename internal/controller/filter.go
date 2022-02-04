@@ -18,7 +18,7 @@ type iFilterController interface {
 }
 
 type filterService interface {
-	GetFilteredFruits(filter, value string) ([]entity.Fruit, error)
+	GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, error)
 }
 
 type filterController struct {
@@ -33,33 +33,29 @@ func NewFilterController(svc filterService) iFilterController {
 
 func (fc *filterController) FilterFruit(c echo.Context) error {
 	// Input Validation
-	p := &entity.FruitsFilterParams{
+	filter := &entity.FruitsFilterParams{
 		Filter: c.Param("filter"),
 		Value:  c.Param("value"),
 	}
-	if err := validator.New().Struct(p); err != nil {
+	if err := validator.New().Struct(filter); err != nil {
 		log.Println("ERROR CONTROLLER:", err)
 		return c.JSON(http.StatusUnprocessableEntity, err.Error())
 	}
-
-	fruits, err := fc.service.GetFilteredFruits(p.Filter, p.Value)
+	fruits, err := fc.service.GetFilteredFruits(filter)
 	// Error response validation
 	if err != nil {
-
 		// Repository file error : internal server
 		if strings.HasSuffix(err.Error(), "no such file or directory") {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
-
 		// Return valid fruits and the parser error
 		// Repository parser error: partial content (lost data)
-		if strings.HasPrefix(err.Error(), "parser error:") {
+		if strings.HasPrefix(err.Error(), "parser error: ") {
 			return c.JSON(http.StatusPartialContent, &entity.FruitsFilterResponse{
 				Fruits:      fruits,
 				ParserError: err.Error(),
 			})
 		}
-
 		// Default response
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
