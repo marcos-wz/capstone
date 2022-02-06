@@ -87,7 +87,7 @@ func (rp *readerRepo) ReadFruits() ([]entity.Fruit, *entity.ReadFruitsError) {
 // If an error occurs, the default type value is set.
 // Params:
 //	- record : the string array csv library format record from file
-//	- numFields : the number of fruit entity struct fields
+//	- numFields : the number of entity struct fields
 func (*readerRepo) parseFruitCSV(record []string, numFields int) (*entity.Fruit, error) {
 	// Initial values
 	fruit := &entity.Fruit{}
@@ -109,7 +109,7 @@ func (*readerRepo) parseFruitCSV(record []string, numFields int) (*entity.Fruit,
 	// 6 - STOCK
 	fruit.Stock, _ = strconv.Atoi(values[6])
 	// 7 - CADUCATE
-	fruit.Caducate, _ = strconv.Atoi(values[7])
+	fruit.CaducateDays, _ = strconv.Atoi(values[7])
 	// 8 - COUNTRY
 	fruit.Country = values[8]
 	// 9 - CREATED AT
