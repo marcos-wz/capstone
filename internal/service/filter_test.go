@@ -14,9 +14,9 @@ type mockReaderRepo struct {
 	mock.Mock
 }
 
-func (mr *mockReaderRepo) ReadFruits() ([]entity.Fruit, error) {
+func (mr *mockReaderRepo) ReadFruits() ([]entity.Fruit, *entity.ReadFruitsError) {
 	arg := mr.Called()
-	return arg.Get(0).([]entity.Fruit), arg.Error(1)
+	return arg.Get(0).([]entity.Fruit), arg.Get(1).(*entity.ReadFruitsError)
 }
 
 // Test data, just filters values
@@ -34,18 +34,16 @@ func TestFilter_FilterFruits(t *testing.T) {
 		name     string
 		filter   *entity.FruitsFilterParams
 		repoResp []entity.Fruit
-		repoErr  error
+		repoErr  *entity.ReadFruitsError
 		response []entity.Fruit
-		err      error
+		err      *entity.FruitsFilterError
 	}{
 		{
-			"Should return the fruit filtered by ID, no errors",
+			"Should return the fruit filtered by ID 1, no errors",
 			&entity.FruitsFilterParams{Filter: "id", Value: "1"},
 			mockFruitsData,
 			nil,
-			[]entity.Fruit{
-				{ID: 1, Name: "Naranja", Country: "Canada", Color: "Yellow"},
-			},
+			[]entity.Fruit{{ID: 1, Name: "Naranja", Country: "Canada", Color: "Yellow"}},
 			nil,
 		},
 		{
@@ -54,7 +52,10 @@ func TestFilter_FilterFruits(t *testing.T) {
 			mockFruitsData,
 			nil,
 			nil,
-			fmt.Errorf("invalid ID filter(badvalue): strconv.Atoi: parsing \"badvalue\": invalid syntax"),
+			&entity.FruitsFilterError{
+				Type:  "Service.FilterError",
+				Error: fmt.Errorf("invalid ID filter(badvalue): strconv.Atoi: parsing \"badvalue\": invalid syntax"),
+			},
 		},
 		{
 			"Should return the fruit filtered by NAME, no errors",
@@ -105,29 +106,46 @@ func TestFilter_FilterFruits(t *testing.T) {
 			mockFruitsData,
 			nil,
 			nil,
-			fmt.Errorf("undefined filter(badfilter): badvalue"),
+			&entity.FruitsFilterError{
+				Type:  "Service.FilterError",
+				Error: fmt.Errorf("undefined filter(badfilter): badvalue"),
+			},
 		},
 		// Repository error: no such file
 		{
 			"Should return repository error, open : no such file or directory",
 			&entity.FruitsFilterParams{Filter: "id", Value: "1"},
 			nil,
-			fmt.Errorf("open : no such file or directory"),
+			&entity.ReadFruitsError{
+				Type:  "Repo.FileError",
+				Error: fmt.Errorf("open : no such file or directory"),
+			},
 			nil,
-			fmt.Errorf("open : no such file or directory"),
+			&entity.FruitsFilterError{
+				Type:  "Repo.FileError",
+				Error: fmt.Errorf("open : no such file or directory"),
+			},
 		},
 		// Repository error: parser error
 		{
 			"Should return repository error, parser error:",
 			&entity.FruitsFilterParams{Filter: "id", Value: "1"},
 			mockFruitsData,
-			fmt.Errorf("parser error: "),
+			&entity.ReadFruitsError{
+				Type:  "Repo.ParserError",
+				Error: fmt.Errorf("reader repository, parse fruit errors found"),
+			},
 			[]entity.Fruit{
 				{ID: 1, Name: "Naranja", Country: "Canada", Color: "Yellow"},
 			},
-			fmt.Errorf("parser error: "),
+			&entity.FruitsFilterError{
+				Type:  "Repo.ParserError",
+				Error: fmt.Errorf("reader repository, parse fruit errors found"),
+			},
 		},
 	}
+	// *************************************
+
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// MOCK
@@ -138,12 +156,12 @@ func TestFilter_FilterFruits(t *testing.T) {
 			fruits, err := service.GetFilteredFruits(tc.filter)
 			assert.Equal(t, tc.err, err)
 			assert.Equal(t, tc.response, fruits)
-			if len(fruits) > 0 {
-				t.Log("Total fruits:", len(fruits))
-				for _, f := range fruits {
-					t.Logf("%+v", f)
-				}
+
+			t.Log("Total fruits:", len(fruits))
+			for _, f := range fruits {
+				t.Logf("%+v", f)
 			}
+
 		})
 
 	}
