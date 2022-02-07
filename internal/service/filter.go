@@ -9,15 +9,15 @@ import (
 	"github.com/marcos-wz/capstone/internal/entity"
 )
 
-// DOMAIN ***********************************************
+// DOMAIN ***************************************************************************
 
 type iFilterService interface {
 	// Get Filtered Fruits from the repository
-	GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, error)
+	GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, *entity.FruitsFilterError)
 }
 
 type readerRepo interface {
-	ReadFruits() ([]entity.Fruit, error)
+	ReadFruits() ([]entity.Fruit, *entity.ReadFruitsError)
 }
 
 type filterService struct {
@@ -28,25 +28,52 @@ func NewFilterService(repo readerRepo) iFilterService {
 	return &filterService{repo}
 }
 
-// IMPLEMENTATION ***************************************
+// IMPLEMENTATION *******************************************************************
 
-func (f *filterService) GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, error) {
+func (f *filterService) GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, *entity.FruitsFilterError) {
 	fruits, errRepo := f.repo.ReadFruits()
 	// Repository errors evaluations
 	if errRepo != nil {
 		// Parser error propagation,
-		// Return fruits with default values and/or ommited invalid records(lost data)
-		if strings.HasPrefix(errRepo.Error(), "parser error: ") {
-			filterdFruits, errFilter := f.filterFactory(fruits, filter)
-			if errFilter != nil {
-				return nil, errFilter
+		switch errRepo.Type {
+		// Repository file error, returns empty fruit list, and error propagation
+		case "Repo.FileError":
+			return nil, &entity.FruitsFilterError{
+				Type:  errRepo.Type,
+				Error: errRepo.Error,
 			}
-			return filterdFruits, errRepo
+		// Repository parser error, returns partial fruit list, with default values
+		case "Repo.ParserError":
+			filterdFruits, err := f.filterFactory(fruits, filter)
+			if err != nil {
+				return nil, &entity.FruitsFilterError{
+					Type:  "Service.FilterError",
+					Error: err,
+				}
+			}
+			// returns filtered PARTIAL fruits list, with error propagation and parsed fruit errors
+			return filterdFruits, &entity.FruitsFilterError{
+				Type:         errRepo.Type,
+				Error:        errRepo.Error,
+				ParserErrors: errRepo.ParserErrors,
+			}
+		default:
+			// Default repository error
+			return nil, &entity.FruitsFilterError{
+				Type:  errRepo.Type,
+				Error: errRepo.Error,
+			}
 		}
-		// Default repository error
-		return nil, errRepo
 	}
-	return f.filterFactory(fruits, filter)
+	// Filter Fruit List
+	filteredFruits, err := f.filterFactory(fruits, filter)
+	if err != nil {
+		return nil, &entity.FruitsFilterError{
+			Type:  "Service.FilterError",
+			Error: err,
+		}
+	}
+	return filteredFruits, nil
 }
 
 // return fruits by filter, if not valid filter returns 0
