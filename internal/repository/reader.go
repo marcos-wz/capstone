@@ -59,7 +59,7 @@ func (rp *readerRepo) ReadFruits() ([]entity.Fruit, *entity.ReadFruitsError) {
 			if len(parserErrors) > 0 {
 				return fruits, &entity.ReadFruitsError{
 					Type:         "Repo.ParserError",
-					Error:        errors.New("repository parser errors found"),
+					Error:        errors.New("reader repository, parse fruit errors found"),
 					ParserErrors: parserErrors,
 				}
 			}
