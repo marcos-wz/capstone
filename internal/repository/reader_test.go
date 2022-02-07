@@ -22,11 +22,11 @@ func TestReader_ReadFruits(t *testing.T) {
 			"Should return all fruits: no errors",
 			"../../data/test/fruits-test-ok.csv",
 			[]entity.Fruit{
-				{ID: 1, Name: "Pera", Description: "Fruta tropical", Color: "green", Unit: "lbs", Price: 0, Stock: 0, CaducateDays: 0, Country: "Canada", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local)},
+				{ID: 1, Name: "Pera", Description: "Fruta tropical", Color: "green", Unit: "lb", Price: 0, Stock: 0, CaducateDays: 0, Country: "Canada", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local)},
 				{ID: 2, Name: "Manzana", Description: "Fruta tropical", Color: "red", Unit: "kg", Price: 0, Stock: 0, CaducateDays: 0, Country: "Mexico", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local)},
 				{ID: 3, Name: "Platano", Description: "Fruta tropical", Color: "yellow", Unit: "kg", Price: 0, Stock: 0, CaducateDays: 0, Country: "Brazil", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local)},
 				{ID: 4, Name: "Mandarina", Description: "Fruta tropical", Color: "orange", Unit: "kg", Price: 0, Stock: 0, CaducateDays: 0, Country: "Mexico", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local)},
-				{ID: 5, Name: "Naranja", Description: "Fruta tropical", Color: "yellow", Unit: "lbs", Price: 0, Stock: 0, CaducateDays: 0, Country: "USA", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local)},
+				{ID: 5, Name: "Naranja", Description: "Fruta tropical", Color: "yellow", Unit: "lb", Price: 0, Stock: 0, CaducateDays: 0, Country: "USA", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local)},
 			},
 			nil,
 		},
@@ -34,63 +34,63 @@ func TestReader_ReadFruits(t *testing.T) {
 			"Should return error `no such file or directory`",
 			"",
 			nil,
-			&entity.ReadFruitsError{Error: errors.New("open : no such file or directory")},
+			&entity.ReadFruitsError{
+				Type:  "Repo.FileError",
+				Error: errors.New("open : no such file or directory"),
+			},
 		},
-		// {
-		// 	"Should return valid fruit list, with parser error",
-		// 	"../../data/test/fruits-test-error.csv",
-		// 	[]entity.Fruit{
-		// 		// Field ID
-		// 		{Name: "TestFruit1", Description: "Fruta tropical", Color: "green", Unit: "lbs", Price: 0, Stock: 0, Caducate: 0, Country: "Canada", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local)},
-		// 		{ID: 0, Name: "TestFruit1", Description: "Fruta tropical", Color: "green", Unit: "lbs", Price: 0, Stock: 0, Caducate: 0, Country: "Canada", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local)},
-		// 		// All fields validations
-		// 		{ID: 0},
-		// 	},
-		// 	&entity.ReadFruitsError{
-		// 		Error: errors.New("cvs parser error"),
-		// 		ParserError: []entity.CSVReaderParsedFruitError{
-		// 			// Field ID empty validation
-		// 			{Record: 1, Errors: []entity.CSVFruitFieldError{
-		// 				{Index: 0, Field: "ID", Error: "strconv.Atoi: parsing \"\": invalid syntax", Required: true},
-		// 			}},
-		// 			// Field ID zero value validation
-		// 			{Record: 2, Errors: []entity.CSVFruitFieldError{
-		// 				{Index: 0, Field: "ID", Error: "zero value", Required: true},
-		// 			}},
-		// 			// All fields validation response
-		// 			{Record: 3, Errors: []entity.CSVFruitFieldError{
-		// 				{Index: 0, Field: "ID", Error: "strconv.Atoi: parsing \"-\": invalid syntax", Required: true},
-		// 				{Index: 1, Field: "Name", Error: "empty value", Required: true},
-		// 				{Index: 3, Field: "Color", Error: "empty value", Required: false},
-		// 				{Index: 4, Field: "Unit", Error: "empty value", Required: false},
-		// 				{Index: 5, Field: "Price", Error: "strconv.ParseFloat: parsing \"\": invalid syntax", Required: false},
-		// 				{Index: 6, Field: "Stock", Error: "strconv.Atoi: parsing \"\": invalid syntax", Required: false},
-		// 				{Index: 7, Field: "Caducate", Error: "strconv.Atoi: parsing \"\": invalid syntax", Required: false},
-		// 				{Index: 9, Field: "CreatedAt", Error: "parsing time \"\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"\" as \"2006\"", Required: false},
-		// 			}},
-		// 		},
-		// 	},
-		// },
+		{
+			"Should return partial fruits list, with parser error",
+			"../../data/test/fruits-test-error.csv",
+			[]entity.Fruit{
+				{ID: 0, Name: "TestFruit1", Description: "Fruta tropical", Color: "green", Unit: "lbs", Price: 0, Stock: 0, CaducateDays: 0, Country: "Canada", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local)},
+				{ID: 0, Name: "TestFruit1", Description: "Fruta tropical", Color: "green", Unit: "lbs", Price: 0, Stock: 0, CaducateDays: 0, Country: "Canada", CreatedAt: time.Date(2022, time.February, 1, 12, 14, 5, 0, time.Local)},
+				{ID: 0, Name: "", Description: "", Color: "", Unit: "", Price: 0, Stock: 0, CaducateDays: 0, Country: "", CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			&entity.ReadFruitsError{
+				Type:  "Repo.ParserError",
+				Error: errors.New("repository parser errors found"),
+				ParserErrors: []entity.ParseFruitRecordCSVError{
+					{Record: 1, Errors: []entity.ParseFruitFieldCSVError{
+						{Field: "ID", Value: "0", Validation: "required", Error: "Key: 'Fruit.ID' Error:Field validation for 'ID' failed on the 'required' tag"},
+						{Field: "Unit", Value: "lbs", Validation: "oneof", Error: "Key: 'Fruit.Unit' Error:Field validation for 'Unit' failed on the 'oneof' tag"},
+					}},
+					{Record: 2, Errors: []entity.ParseFruitFieldCSVError{
+						{Field: "ID", Value: "0", Validation: "required", Error: "Key: 'Fruit.ID' Error:Field validation for 'ID' failed on the 'required' tag"},
+						{Field: "Unit", Value: "lbs", Validation: "oneof", Error: "Key: 'Fruit.Unit' Error:Field validation for 'Unit' failed on the 'oneof' tag"},
+					}},
+					{Record: 3, Errors: []entity.ParseFruitFieldCSVError{
+						{Field: "ID", Value: "0", Validation: "required", Error: "Key: 'Fruit.ID' Error:Field validation for 'ID' failed on the 'required' tag"},
+						{Field: "Name", Value: "", Validation: "required", Error: "Key: 'Fruit.Name' Error:Field validation for 'Name' failed on the 'required' tag"},
+						{Field: "Color", Value: "", Validation: "required", Error: "Key: 'Fruit.Color' Error:Field validation for 'Color' failed on the 'required' tag"},
+						{Field: "Unit", Value: "", Validation: "oneof", Error: "Key: 'Fruit.Unit' Error:Field validation for 'Unit' failed on the 'oneof' tag"}, entity.ParseFruitFieldCSVError{Field: "Country", Value: "", Validation: "required", Error: "Key: 'Fruit.Country' Error:Field validation for 'Country' failed on the 'required' tag"}, entity.ParseFruitFieldCSVError{Field: "CreatedAt", Value: "0001-01-01 00:00:00 +0000 UTC", Validation: "required", Error: "Key: 'Fruit.CreatedAt' Error:Field validation for 'CreatedAt' failed on the 'required' tag"},
+					}},
+				},
+			},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			repo := NewReaderRepo(tc.filePath)
 			fruits, err := repo.ReadFruits()
-			// Errors
+			// Error
 			if err != nil {
+				assert.Equal(t, tc.err.Type, err.Type)
 				assert.EqualError(t, err.Error, tc.err.Error.Error())
-				assert.Equal(t, tc.err.ParserError, err.ParserError)
+				assert.Len(t, err.ParserErrors, len(tc.err.ParserErrors))
+				assert.EqualValues(t, tc.err.ParserErrors, err.ParserErrors)
+				// t.Logf("Parser errors: %v", err.ParserErrors)
 			}
 			// Response
-			assert.Equal(t, len(tc.response), len(fruits))
+			assert.Len(t, fruits, len(tc.response))
 			assert.EqualValues(t, tc.response, fruits)
-			// Debug ---------
-			// if len(fruits) > 0 {
-			// 	t.Log("Total fruits:", len(fruits))
-			// 	for _, f := range fruits {
-			// 		t.Logf("%+v", f)
-			// 	}
-			// }
+			// // Debug ---------
+			// // if len(fruits) > 0 {
+			// // 	t.Log("Total fruits:", len(fruits))
+			// // 	for _, f := range fruits {
+			// // 		t.Logf("%+v", f)
+			// // 	}
+			// // }
 		})
 	}
 }
