@@ -3,10 +3,10 @@ package entity
 // ERRORS *****************
 
 type ParseFruitFieldCSVError struct {
-	Field      string
-	Value      string
-	Validation string
-	Error      string
+	Field      string `json:"field"`
+	Value      string `json:"value"`
+	Validation string `json:"validation"`
+	Error      string `json:"error"`
 }
 
 type ParseFruitRecordCSVError struct {
