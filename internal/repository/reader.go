@@ -3,6 +3,7 @@ package repository
 import (
 	"encoding/csv"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -35,51 +36,64 @@ func (rp *readerRepo) ReadFruits() ([]entity.Fruit, *entity.ReadFruitsError) {
 	// File
 	f, err := os.Open(rp.filePath)
 	if err != nil {
-		log.Println("ERROR:", err)
-		return nil, &entity.ReadFruitsError{Error: err}
+		log.Println("ERROR Reader Repo:", err)
+		return nil, &entity.ReadFruitsError{
+			Type:  "Repo.FileError",
+			Error: err,
+		}
 	}
 	defer f.Close()
 	// CSV
 	csvReader := csv.NewReader(f)
 	csvReader.FieldsPerRecord = -1
-	list := []entity.Fruit{}
-	numRecord := 0 // counter record is used for parser error description
-	parserRecordErrs := []entity.CSVReaderParsedFruitError{}
-	// Dynamic number of fruit entity struct
-	numRecordFields := reflect.TypeOf(entity.Fruit{}).NumField()
+	fruits := []entity.Fruit{}
+	parserErrors := []entity.ParseFruitRecordCSVError{}
+	numRecord := 0                                               // counter record is used for parser error description
+	numRecordFields := reflect.TypeOf(entity.Fruit{}).NumField() // Set dynamic number of fields, based on Fruit entity
 	for {
 		record, err := csvReader.Read()
 		// End of file, returns the parsed fruit records found in file
 		if err == io.EOF {
 			// if parser error exists, returns the partial parsed fruits, with default values set and the field error
 			// with "parser error:"
-			if len(parserRecordErrs) > 0 {
-				return list, &entity.ReadFruitsError{
-					Error:       errors.New("cvs parser error"),
-					ParserError: parserRecordErrs,
+			if len(parserErrors) > 0 {
+				return fruits, &entity.ReadFruitsError{
+					Type:         "Repo.ParserError",
+					Error:        errors.New("repository parser errors found"),
+					ParserErrors: parserErrors,
 				}
 			}
-			return list, nil
+			return fruits, nil
 		}
 		numRecord++
 		// Add parsed fruit to the list
 		fruit, err := rp.parseFruitCSV(record, numRecordFields)
 		if err != nil {
+			validationErrors := err.(validator.ValidationErrors)
+			// Parser validation errors to ParseFruitFieldCSVError type
+			fieldErrs := []entity.ParseFruitFieldCSVError{}
+			for _, vErr := range validationErrors {
+				fieldErrs = append(fieldErrs, entity.ParseFruitFieldCSVError{
+					Field:      vErr.Field(),
+					Value:      fmt.Sprintf("%v", vErr.Value()),
+					Validation: vErr.ActualTag(),
+					Error:      vErr.Error(),
+				})
+			}
 			// Append the parsed record errors
-			parserRecordErrs = append(parserRecordErrs,
-				entity.CSVReaderParsedFruitError{Record: numRecord, Error: err},
-			)
+			parserErrors = append(parserErrors, entity.ParseFruitRecordCSVError{
+				Record: numRecord, Errors: fieldErrs,
+			})
 			// Validate required fields. If required field error exists, the record is ommited
 			// NOTE: this is a lost data error, taking some actions should be important
-			// for _, err := range errs {
-			// 	if err.Required {
-			// 		log.Printf("REPO Parser required field: %v - %q: %v", err.Index, err.Field, err.Error)
-			// 		// Take some logging actions
-			// 		continue
-			// 	}
-			// }
+			for _, vErr := range validationErrors {
+				if vErr.StructField() == "ID" || vErr.StructField() == "Name" {
+					log.Printf("ERROR Repo: Invalid record(lost data): field: %q, value: %v, error:  %v ", vErr.StructField(), vErr.Value(), vErr.Error())
+					continue
+				}
+			}
 		}
-		list = append(list, *fruit)
+		fruits = append(fruits, *fruit)
 	}
 }
 
