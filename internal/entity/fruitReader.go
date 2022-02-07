@@ -2,18 +2,20 @@ package entity
 
 // ERRORS *****************
 
-type ParseCSVFruitFieldError struct {
-	// the index position field on the csv record
-	Index int `json:"index"`
-	// Field struct to be evaluated
-	Field string `json:"field"`
-	// Error validation response
-	Error string `json:"error"`
-	// Set field as required
-	Required bool
+type ParseFruitFieldCSVError struct {
+	Field      string
+	Value      string
+	Validation string
+	Error      string
 }
 
-type ParseCVSFruitRecordError struct {
+type ParseFruitRecordCSVError struct {
 	Record int                       `json:"record"`
-	Errors []ParseCSVFruitFieldError `json:"errors"`
+	Errors []ParseFruitFieldCSVError `json:"errors"`
+}
+
+type ReadFruitsError struct {
+	Type         string
+	Error        error
+	ParserErrors []ParseFruitRecordCSVError
 }
