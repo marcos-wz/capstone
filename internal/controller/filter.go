@@ -16,15 +16,15 @@ type iFilterController interface {
 	FilterFruit(c echo.Context) error
 }
 
-type filterService interface {
-	GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, *entity.FruitsFilterError)
+type FilterService interface {
+	GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, *entity.FruitFilterError)
 }
 
 type filterController struct {
-	service filterService
+	service FilterService
 }
 
-func NewFilterController(svc filterService) iFilterController {
+func NewFilterController(svc FilterService) iFilterController {
 	return &filterController{svc}
 }
 
@@ -39,10 +39,9 @@ func (fc *filterController) FilterFruit(c echo.Context) error {
 	// Entity Error response: Unprocessable Entity
 	if err := validator.New().Struct(filter); err != nil {
 		log.Println("ERROR Controller: entity validation - ", err)
-		return c.JSON(
-			http.StatusUnprocessableEntity,
-			map[string]string{"message": err.Error()},
-		)
+		return c.JSON(http.StatusUnprocessableEntity, &entity.ErrorResponse{
+			Message: err.Error(),
+		})
 	}
 	fruits, err := fc.service.GetFilteredFruits(filter)
 	// Error validations
@@ -50,27 +49,24 @@ func (fc *filterController) FilterFruit(c echo.Context) error {
 		switch err.Type {
 		// Repository File Error response: internal server error
 		case "Repo.FileError":
-			return c.JSON(
-				http.StatusInternalServerError,
-				map[string]string{"message": err.Error.Error()},
-			)
-		// Repository parser error response : partial content data with errors
+			return c.JSON(http.StatusInternalServerError, &entity.ErrorResponse{
+				Message: err.Error.Error(),
+			})
+		// Repository parser error response : partial fruits with parser errors
 		case "Repo.ParserError":
-			return c.JSON(
-				http.StatusPartialContent,
-				map[string]interface{}{"fruits": fruits, "parser_errors": err.ParserErrors},
-			)
+			return c.JSON(http.StatusPartialContent, &entity.FruitFilterResponse{
+				Fruits:       fruits,
+				ParserErrors: err.ParserErrors,
+			})
 		default:
 			// Default error response
-			return c.JSON(
-				http.StatusBadRequest,
-				map[string]string{"message": err.Error.Error()},
-			)
+			return c.JSON(http.StatusBadRequest, &entity.ErrorResponse{
+				Message: err.Error.Error(),
+			})
 		}
 	}
 	// Successful response
-	return c.JSON(
-		http.StatusOK,
-		map[string]interface{}{"fruits": fruits},
-	)
+	return c.JSON(http.StatusOK, &entity.FruitFilterResponse{
+		Fruits: fruits,
+	})
 }
