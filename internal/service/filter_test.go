@@ -36,7 +36,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 		repoResp []entity.Fruit
 		repoErr  *entity.ReadFruitsError
 		response []entity.Fruit
-		err      *entity.FruitsFilterError
+		err      *entity.FruitFilterError
 	}{
 		{
 			"Should return the fruit filtered by ID 1, no errors",
@@ -52,7 +52,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 			mockFruitsData,
 			nil,
 			nil,
-			&entity.FruitsFilterError{
+			&entity.FruitFilterError{
 				Type:  "Service.FilterError",
 				Error: fmt.Errorf("invalid ID filter(badvalue): strconv.Atoi: parsing \"badvalue\": invalid syntax"),
 			},
@@ -106,7 +106,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 			mockFruitsData,
 			nil,
 			nil,
-			&entity.FruitsFilterError{
+			&entity.FruitFilterError{
 				Type:  "Service.FilterError",
 				Error: fmt.Errorf("undefined filter(badfilter): badvalue"),
 			},
@@ -121,7 +121,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 				Error: fmt.Errorf("open : no such file or directory"),
 			},
 			nil,
-			&entity.FruitsFilterError{
+			&entity.FruitFilterError{
 				Type:  "Repo.FileError",
 				Error: fmt.Errorf("open : no such file or directory"),
 			},
@@ -138,7 +138,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 			[]entity.Fruit{
 				{ID: 1, Name: "Naranja", Country: "Canada", Color: "Yellow"},
 			},
-			&entity.FruitsFilterError{
+			&entity.FruitFilterError{
 				Type:  "Repo.ParserError",
 				Error: fmt.Errorf("reader repository, parse fruit errors found"),
 			},
