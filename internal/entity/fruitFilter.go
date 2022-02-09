@@ -2,13 +2,19 @@ package entity
 
 // PARAMS
 type FruitsFilterParams struct {
-	Filter string `param:"filter" validate:"oneof=id name color country all"`
-	Value  string `param:"value" validate:"required,alphanum"`
+	Filter string `validate:"oneof=id name color country"`
+	Value  string `validate:"required,alphanum"`
 }
 
 // ERRORS
-type FruitsFilterError struct {
+type FruitFilterError struct {
 	Type         string
 	Error        error
 	ParserErrors []ParseFruitRecordCSVError
+}
+
+// REPONSES
+type FruitFilterResponse struct {
+	Fruits       []Fruit                    `json:"fruits"`
+	ParserErrors []ParseFruitRecordCSVError `json:"parser_errors,omitempty"`
 }
