@@ -12,27 +12,19 @@ func main() {
 
 	// Repo csv file path
 	const csvFile string = "data/fruits.csv"
-	// const csvFile string = "data/fruits-test-error.csv"
-	// NOTE: should i use environment variable, USE VIPER
-	// var csvFile = os.Get("CSV_FILE")
+	// const csvFile string = "data/test/csv/fruits-test-error.csv"
+	// var csvFile = os.Get("CSV_FILE") // NOTE: should i use environment variable, USE VIPER
 
 	e := echo.New()
 	e.Use(middleware.Logger())
 
-	// Get Fruits Filter handler
-	// NOTE: where should i put creators ?
+	// Creators
+	readerRepo := repository.NewReaderRepo(csvFile)
+	filterService := service.NewFilterService(readerRepo)
+	filterController := controller.NewFilterController(filterService)
 
-	repo := repository.NewReaderRepo(csvFile)
-	svc := service.NewFilterService(repo)
-	ctrl := controller.NewFilterController(svc)
-	e.GET("/v1/fruit/:filter/:value", ctrl.FilterFruit)
-
-	e.GET("/v1/fruit/:filter/:value", func(c echo.Context) error {
-		repo := repository.NewReaderRepo(csvFile)
-		svc := service.NewFilterService(repo)
-		ctrl := controller.NewFilterController(svc)
-		return ctrl.FilterFruit(c)
-	})
+	// Handlers
+	e.GET("/v1/fruit/:filter/:value", filterController.FilterFruit)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
