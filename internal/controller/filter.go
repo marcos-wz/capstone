@@ -13,6 +13,17 @@ import (
 
 type iFilterController interface {
 	// Get fruits filtered from the service
+	// Always return json reponses.
+	// Only valid filters and values are allowed.
+	// PARAMS:
+	// 	- filter: the field filter request - filters allowed: id, name, color, country
+	//	- value: the filter value request
+	// RESPONSES:
+	// 	- 200 Status OK: returns filter response with fruits filtered list
+	//	- 206 Partial Content: returns filter response with fruits filtered list and reader parser errors(Invalid CSV file!!)
+	//	- 422 Unprocessable Entity : returns param filter and value errors
+	//	- 500 Internal Server : returns reader CSV File error (critical!)
+	//	- 400 Bad Request: default errors
 	FilterFruit(c echo.Context) error
 }
 
@@ -31,14 +42,13 @@ func NewFilterController(svc FilterService) iFilterController {
 // IMPLEMENTATION ********************************
 
 func (fc *filterController) FilterFruit(c echo.Context) error {
-	// Input Validation
+	// Filter request validation. Invalid filter response unprocessable entity
 	filter := &entity.FruitsFilterParams{
 		Filter: c.Param("filter"),
 		Value:  c.Param("value"),
 	}
-	// Entity Error response: Unprocessable Entity
 	if err := validator.New().Struct(filter); err != nil {
-		log.Println("ERROR Controller: entity validation - ", err)
+		log.Println("ERROR Controller: filter request validation - ", err)
 		return c.JSON(http.StatusUnprocessableEntity, &entity.ErrorResponse{
 			Message: err.Error(),
 		})
