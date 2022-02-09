@@ -12,12 +12,13 @@ import (
 // DOMAIN ***************************************************************************
 
 type iFilterService interface {
-	// Get Filtered Fruits from the repository
+	// Get Filtered Fruits from the repository, refactor by filter.
 	// PARAMS:
 	//	- Valid Filter
 	// RETURNS:
 	//	- List of fruits
-	//	- Repository error propagation type: Repo.FileError and Repo.ParserError
+	//	- Repository error propagation support
+	//  - If repository parse reader error exists, returns partial fruits list, with default values, and parser error validations
 	GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, *entity.FruitFilterError)
 }
 
