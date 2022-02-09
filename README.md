@@ -5,10 +5,10 @@ The purpouse of this system is to manage a fruit store stock.
 These are the main features system:
 - Solid, secure, maintainable, and testeable code.
 - Clean architecture, one method per interface.
-- Every layer unit tests implementation. Testify and Mockery used library.
+- Each layer(controllers,services,and repositories) contains its own unit tests. Testify and Mockery libraries are used.
 - Input data integrity validations based on tags through validator library.
-- Error propagation management.
-- Echo http framework based.
+- Error propagation implementation.
+- Echo HTTP framework based.
 - Directories explanation:
     - Docs directory contains basics flow chart.
     - Build directory contains deployments files, docker, kubernetes, makefiles, scripts.
