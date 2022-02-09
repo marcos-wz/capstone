@@ -13,7 +13,7 @@ import (
 
 type iFilterService interface {
 	// Get Filtered Fruits from the repository
-	GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, *entity.FruitsFilterError)
+	GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, *entity.FruitFilterError)
 }
 
 type readerRepo interface {
@@ -30,7 +30,7 @@ func NewFilterService(repo readerRepo) iFilterService {
 
 // IMPLEMENTATION *******************************************************************
 
-func (f *filterService) GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, *entity.FruitsFilterError) {
+func (f *filterService) GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, *entity.FruitFilterError) {
 	fruits, errRepo := f.repo.ReadFruits()
 	// Repository errors evaluations
 	if errRepo != nil {
@@ -38,7 +38,7 @@ func (f *filterService) GetFilteredFruits(filter *entity.FruitsFilterParams) ([]
 		switch errRepo.Type {
 		// Repository file error, returns empty fruit list, and error propagation
 		case "Repo.FileError":
-			return nil, &entity.FruitsFilterError{
+			return nil, &entity.FruitFilterError{
 				Type:  errRepo.Type,
 				Error: errRepo.Error,
 			}
@@ -46,20 +46,20 @@ func (f *filterService) GetFilteredFruits(filter *entity.FruitsFilterParams) ([]
 		case "Repo.ParserError":
 			filterdFruits, err := f.filterFactory(fruits, filter)
 			if err != nil {
-				return nil, &entity.FruitsFilterError{
+				return nil, &entity.FruitFilterError{
 					Type:  "Service.FilterError",
 					Error: err,
 				}
 			}
 			// returns filtered PARTIAL fruits list, with error propagation and parsed fruit errors
-			return filterdFruits, &entity.FruitsFilterError{
+			return filterdFruits, &entity.FruitFilterError{
 				Type:         errRepo.Type,
 				Error:        errRepo.Error,
 				ParserErrors: errRepo.ParserErrors,
 			}
 		default:
 			// Default repository error
-			return nil, &entity.FruitsFilterError{
+			return nil, &entity.FruitFilterError{
 				Type:  errRepo.Type,
 				Error: errRepo.Error,
 			}
@@ -68,7 +68,7 @@ func (f *filterService) GetFilteredFruits(filter *entity.FruitsFilterParams) ([]
 	// Filter Fruit List
 	filteredFruits, err := f.filterFactory(fruits, filter)
 	if err != nil {
-		return nil, &entity.FruitsFilterError{
+		return nil, &entity.FruitFilterError{
 			Type:  "Service.FilterError",
 			Error: err,
 		}
@@ -93,8 +93,6 @@ func (f *filterService) filterFactory(fruits []entity.Fruit, filter *entity.Frui
 		return f.filterByColor(fruits, filter.Value), nil
 	case "country":
 		return f.filterByCountry(fruits, filter.Value), nil
-	case "all":
-		return fruits, nil
 	default:
 		err := fmt.Errorf("undefined filter(%v): %v", filter.Filter, filter.Value)
 		log.Println("ERROR Service:", err)
