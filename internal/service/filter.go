@@ -13,6 +13,11 @@ import (
 
 type iFilterService interface {
 	// Get Filtered Fruits from the repository
+	// PARAMS:
+	//	- Valid Filter
+	// RETURNS:
+	//	- List of fruits
+	//	- Repository error propagation type: Repo.FileError and Repo.ParserError
 	GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, *entity.FruitFilterError)
 }
 
@@ -58,7 +63,7 @@ func (f *filterService) GetFilteredFruits(filter *entity.FruitsFilterParams) ([]
 				ParserErrors: errRepo.ParserErrors,
 			}
 		default:
-			// Default repository error
+			// Default repository error propagation
 			return nil, &entity.FruitFilterError{
 				Type:  errRepo.Type,
 				Error: errRepo.Error,
