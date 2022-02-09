@@ -37,18 +37,10 @@ func NewFilterService(repo ReaderRepo) iFilterService {
 
 func (f *filterService) GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, *entity.FruitFilterError) {
 	fruits, errRepo := f.repo.ReadFruits()
-	// Repository errors evaluations
+	// Repository error propagation
 	if errRepo != nil {
-		// Parser error propagation,
-		switch errRepo.Type {
-		// Repository file error, returns empty fruit list, and error propagation
-		case "Repo.FileError":
-			return nil, &entity.FruitFilterError{
-				Type:  errRepo.Type,
-				Error: errRepo.Error,
-			}
-		// Repository parser error, returns partial fruit list, with default values
-		case "Repo.ParserError":
+		// Repository parser error propagation, returns partial fruit list, with default values
+		if errRepo.Type == "Repo.ParserError" {
 			filterdFruits, err := f.filterFactory(fruits, filter)
 			if err != nil {
 				return nil, &entity.FruitFilterError{
@@ -56,18 +48,17 @@ func (f *filterService) GetFilteredFruits(filter *entity.FruitsFilterParams) ([]
 					Error: err,
 				}
 			}
-			// returns filtered PARTIAL fruits list, with error propagation and parsed fruit errors
+			// returns filtered partial fruits list, and repository parsed fruit errors
 			return filterdFruits, &entity.FruitFilterError{
 				Type:         errRepo.Type,
 				Error:        errRepo.Error,
 				ParserErrors: errRepo.ParserErrors,
 			}
-		default:
-			// Default repository error propagation
-			return nil, &entity.FruitFilterError{
-				Type:  errRepo.Type,
-				Error: errRepo.Error,
-			}
+		}
+		// Default repository error propagation
+		return nil, &entity.FruitFilterError{
+			Type:  errRepo.Type,
+			Error: errRepo.Error,
 		}
 	}
 	// Filter Fruit List
