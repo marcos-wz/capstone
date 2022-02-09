@@ -9,42 +9,29 @@ import (
 	"testing"
 
 	"github.com/labstack/echo"
+	"github.com/marcos-wz/capstone/internal/controller/mocks"
 	"github.com/marcos-wz/capstone/internal/entity"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
-// MOCK *******************************************
-
-type mockFilterService struct {
-	mock.Mock
-}
-
-func (mr *mockFilterService) GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, *entity.FruitsFilterError) {
-	arg := mr.Called()
-	return arg.Get(0).([]entity.Fruit), arg.Get(1).(*entity.FruitsFilterError)
-}
-
-// UNIT TEST ***************************************
+// FILTER FRUIT - UNIT TEST ***************************************
 
 func TestFilter_FilterFruit(t *testing.T) {
-
-	e := echo.New() // Echo http server instance
+	// Echo http server instance
+	e := echo.New()
 	// Test use cases
 	var testCases = []struct {
 		name            string
 		params          *entity.FruitsFilterParams
 		serviceResponse []entity.Fruit
-		serviceError    *entity.FruitsFilterError
+		serviceError    *entity.FruitFilterError
 		responseCode    int
 		responseBody    string
 	}{
 		{
 			"Should return the fruit ID 2 with Code: 200",
 			&entity.FruitsFilterParams{Filter: "id", Value: "2"},
-			[]entity.Fruit{
-				{ID: 2, Name: "Manzana", Country: "Mexico", Color: "Red"},
-			},
+			[]entity.Fruit{{ID: 2, Name: "Manzana", Country: "Mexico", Color: "Red"}},
 			nil,
 			http.StatusOK,
 			"{\"fruits\":[{\"id\":2,\"name\":\"Manzana\",\"description\":\"\",\"color\":\"Red\",\"unit\":\"\",\"price\":0,\"stock\":0,\"caducate_days\":0,\"country\":\"Mexico\",\"created_at\":\"0001-01-01T00:00:00Z\"}]}\n",
@@ -78,23 +65,30 @@ func TestFilter_FilterFruit(t *testing.T) {
 			"Should return repository internal server error: Code 500, no such file or directory",
 			&entity.FruitsFilterParams{Filter: "id", Value: "2"},
 			nil,
-			&entity.FruitsFilterError{
+			&entity.FruitFilterError{
 				Type:  "Repo.FileError",
 				Error: errors.New("no such file or directory"),
 			},
 			http.StatusInternalServerError,
 			"{\"message\":\"no such file or directory\"}\n",
 		},
-		// {
-		// 	"Should return repository parser error: Code 206, partial content",
-		// 	&entity.FruitsFilterParams{Filter: "id", Value: "2"},
-		// 	[]entity.Fruit{
-		// 		{ID: 2, Name: "manzana", Country: "Mexico", Color: "Red"},
-		// 	},
-		// 	errors.New("parser error: "),
-		// 	http.StatusPartialContent,
-		// 	"{\"fruits\":[{\"id\":2,\"name\":\"manzana\",\"description\":\"\",\"color\":\"Red\",\"unit\":\"\",\"price\":0,\"stock\":0,\"caducate\":0,\"country\":\"Mexico\",\"CreatedAt\":\"0001-01-01T00:00:00Z\"}],\"parser_error\":\"parser error: \"}\n",
-		// },
+		{
+			"Should return repository parser error: Code 206, partial content",
+			&entity.FruitsFilterParams{Filter: "id", Value: "2"},
+			[]entity.Fruit{{ID: 2, Name: "manzana", Country: "Mexico", Color: "Red"}},
+			&entity.FruitFilterError{
+				Type:  "Repo.ParserError",
+				Error: errors.New("reader repository, parse fruit errors found"),
+				ParserErrors: []entity.ParseFruitRecordCSVError{
+					{Record: 1, Errors: []entity.ParseFruitFieldCSVError{
+						{Field: "ID", Value: "0", Validation: "required", Error: "Key: 'Fruit.ID' Error:Field validation for 'ID' failed on the 'required' tag"},
+						{Field: "Unit", Value: "lbs", Validation: "oneof", Error: "Key: 'Fruit.Unit' Error:Field validation for 'Unit' failed on the 'oneof' tag"},
+					}},
+				},
+			},
+			http.StatusPartialContent,
+			"{\"fruits\":[{\"id\":2,\"name\":\"manzana\",\"description\":\"\",\"color\":\"Red\",\"unit\":\"\",\"price\":0,\"stock\":0,\"caducate_days\":0,\"country\":\"Mexico\",\"created_at\":\"0001-01-01T00:00:00Z\"}],\"parser_errors\":[{\"record\":1,\"errors\":[{\"field\":\"ID\",\"value\":\"0\",\"validation\":\"required\",\"error\":\"Key: 'Fruit.ID' Error:Field validation for 'ID' failed on the 'required' tag\"},{\"field\":\"Unit\",\"value\":\"lbs\",\"validation\":\"oneof\",\"error\":\"Key: 'Fruit.Unit' Error:Field validation for 'Unit' failed on the 'oneof' tag\"}]}]}\n",
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -106,47 +100,42 @@ func TestFilter_FilterFruit(t *testing.T) {
 			c.SetParamNames("filter", "value")
 			c.SetParamValues(tc.params.Filter, tc.params.Value)
 			// Mock
-			mock := mockFilterService{}
-			mock.On("GetFilteredFruits").Return(tc.serviceResponse, tc.serviceError)
+			mock := &mocks.FilterService{}
+			mock.On("GetFilteredFruits", tc.params).Return(tc.serviceResponse, tc.serviceError)
 			// Controller
-			ctrl := NewFilterController(&mock)
-			// JSON RESPONSE
-			bodyJson := make(map[string]interface{}) // unmarshall json reponses intance
+			ctrl := NewFilterController(mock)
 
 			// Assertions
 			if assert.NoError(t, ctrl.FilterFruit(c)) {
-
 				assert.Equal(t, tc.responseCode, rec.Code)
 				assert.Equal(t, tc.responseBody, rec.Body.String())
-				assert.NoError(t, json.NewDecoder(rec.Body).Decode(&bodyJson))
-				// Response validations
 				switch rec.Code {
+				// Response OK : 200
 				case http.StatusOK:
-					fruits, ok := bodyJson["fruits"]
-					if assert.True(t, ok) {
-						assert.NotEmpty(t, fruits)
-						assert.Len(t, fruits, len(tc.serviceResponse))
-					}
+					resp := &entity.FruitFilterResponse{}
+					assert.NoError(t, json.Unmarshal(rec.Body.Bytes(), resp))
+					assert.EqualValues(t, tc.serviceResponse, resp.Fruits)
+					assert.Nil(t, resp.ParserErrors)
+				// Response UNPROCESSABLE-ENTITY : 422
 				case http.StatusUnprocessableEntity:
-					message, ok := bodyJson["message"]
-					if assert.True(t, ok) {
-						assert.NotEmpty(t, message)
-					}
+					resp, respTc := &entity.ErrorResponse{}, &entity.ErrorResponse{}
+					assert.NoError(t, json.Unmarshal(rec.Body.Bytes(), resp))
+					assert.NoError(t, json.Unmarshal([]byte(tc.responseBody), respTc))
+					assert.Equal(t, respTc, resp)
+				// Response INTERNAL-SERVER : 500
 				case http.StatusInternalServerError:
-					message, ok := bodyJson["message"]
-					if assert.True(t, ok) {
-						assert.NotEmpty(t, message)
-					}
+					resp := &entity.ErrorResponse{}
+					assert.NoError(t, json.Unmarshal(rec.Body.Bytes(), resp))
+					assert.EqualError(t, tc.serviceError.Error, resp.Message)
+				// Response PARTIAL-CONTENT : 206
 				case http.StatusPartialContent:
-					t.Log("Unprocessable Entity Val")
-				case http.StatusBadRequest:
-					t.Log("Unprocessable Entity Val")
+					resp := &entity.FruitFilterResponse{}
+					assert.NoError(t, json.Unmarshal(rec.Body.Bytes(), resp))
+					assert.EqualValues(t, tc.serviceResponse, resp.Fruits)
+					assert.Equal(t, tc.serviceError.ParserErrors, resp.ParserErrors)
 				default:
 					t.Errorf("The status code %d, should be defined: %s", rec.Code, rec.Body)
 				}
-				t.Log("Resp CODE:", rec.Code)
-				t.Logf("Resp BODY Json: %v", bodyJson)
-				// t.Logf("Resp BODY String: %v", rec.Body.String())
 			}
 		})
 	}
