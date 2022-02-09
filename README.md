@@ -22,9 +22,10 @@ These are the main features system:
 - Only valid filters and values are allowed.
 - Valid filters are managed by entity tags using validator library. 
 - Current active filters: id, name, color, country.
+
 Fruit Filter responses:
 - 200 Status OK: returns fruits filtered list
-- 206 Partial Content: returns fruits filtered list and reader parser errors(Invalid CSV file!!)	
+- 206 Partial Content: returns fruits filtered  partial list and reader parser errors(invalid csv file data!!)	
 - 422 Unprocessable Entity : returns param filter and value errors
 - 500 Internal Server : returns reader CSV File error (critical!)
 - 400 Bad Request: default errors
