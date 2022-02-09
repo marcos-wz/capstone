@@ -5,38 +5,30 @@ import (
 	"testing"
 
 	"github.com/marcos-wz/capstone/internal/entity"
+	"github.com/marcos-wz/capstone/internal/service/mocks"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
-// Mock
-type mockReaderRepo struct {
-	mock.Mock
-}
-
-func (mr *mockReaderRepo) ReadFruits() ([]entity.Fruit, *entity.ReadFruitsError) {
-	arg := mr.Called()
-	return arg.Get(0).([]entity.Fruit), arg.Get(1).(*entity.ReadFruitsError)
-}
-
-// Test data, just filters values
-var mockFruitsData = []entity.Fruit{
-	{ID: 1, Name: "Naranja", Country: "Canada", Color: "Yellow"},
-	{ID: 2, Name: "manzana", Country: "Mexico", Color: "Red"},
-	{ID: 3, Name: "Pera", Country: "usa", Color: "Green"},
-	{ID: 4, Name: "Platano", Country: "USA", Color: "yellow"},
-}
-
-// UNIT TEST ****************************
+// FilterFruits - UNIT TEST ****************************
 
 func TestFilter_FilterFruits(t *testing.T) {
+
+	// Test data, just filters values
+	var mockFruitsData = []entity.Fruit{
+		{ID: 1, Name: "Naranja", Country: "Canada", Color: "Yellow"},
+		{ID: 2, Name: "manzana", Country: "Mexico", Color: "Red"},
+		{ID: 3, Name: "Pera", Country: "usa", Color: "Green"},
+		{ID: 4, Name: "Platano", Country: "USA", Color: "yellow"},
+	}
+
+	// test use cases
 	var testCases = []struct {
-		name     string
-		filter   *entity.FruitsFilterParams
-		repoResp []entity.Fruit
-		repoErr  *entity.ReadFruitsError
-		response []entity.Fruit
-		err      *entity.FruitFilterError
+		name         string
+		filter       *entity.FruitsFilterParams
+		repoResponse []entity.Fruit
+		repoErr      *entity.ReadFruitsError
+		response     []entity.Fruit
+		err          *entity.FruitFilterError
 	}{
 		{
 			"Should return the fruit filtered by ID 1, no errors",
@@ -88,19 +80,6 @@ func TestFilter_FilterFruits(t *testing.T) {
 			nil,
 		},
 		{
-			"Should return all fruits, no errors",
-			&entity.FruitsFilterParams{Filter: "all", Value: ""},
-			mockFruitsData,
-			nil,
-			[]entity.Fruit{
-				{ID: 1, Name: "Naranja", Country: "Canada", Color: "Yellow"},
-				{ID: 2, Name: "manzana", Country: "Mexico", Color: "Red"},
-				{ID: 3, Name: "Pera", Country: "usa", Color: "Green"},
-				{ID: 4, Name: "Platano", Country: "USA", Color: "yellow"},
-			},
-			nil,
-		},
-		{
 			"Should return error, Invalid Filter: undefined filter",
 			&entity.FruitsFilterParams{Filter: "badfilter", Value: "badvalue"},
 			mockFruitsData,
@@ -144,19 +123,19 @@ func TestFilter_FilterFruits(t *testing.T) {
 			},
 		},
 	}
+
 	// *************************************
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// MOCK
-			mock := mockReaderRepo{}
-			mock.On("ReadFruits").Return(tc.repoResp, tc.repoErr)
+			mock := &mocks.ReaderRepo{}
+			mock.On("ReadFruits").Return(tc.repoResponse, tc.repoErr)
 			// SERVICE
-			service := NewFilterService(&mock)
+			service := NewFilterService(mock)
 			fruits, err := service.GetFilteredFruits(tc.filter)
 			assert.Equal(t, tc.err, err)
 			assert.Equal(t, tc.response, fruits)
-
 			t.Log("Total fruits:", len(fruits))
 			for _, f := range fruits {
 				t.Logf("%+v", f)
