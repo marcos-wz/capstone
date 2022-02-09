@@ -16,15 +16,15 @@ type iFilterService interface {
 	GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, *entity.FruitFilterError)
 }
 
-type readerRepo interface {
+type ReaderRepo interface {
 	ReadFruits() ([]entity.Fruit, *entity.ReadFruitsError)
 }
 
 type filterService struct {
-	repo readerRepo
+	repo ReaderRepo
 }
 
-func NewFilterService(repo readerRepo) iFilterService {
+func NewFilterService(repo ReaderRepo) iFilterService {
 	return &filterService{repo}
 }
 
