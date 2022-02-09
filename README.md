@@ -10,7 +10,7 @@ These are the main features system:
 - Error propagation implementation.
 - Echo HTTP framework based.
 - Directories explanation:
-    - Docs directory contains basics flow chart.
+    - Docs directory contains deliveries flow chart.
     - Build directory contains deployments files, docker, kubernetes, makefiles, scripts.
     - Data directory contains production and testing data, csv and json files.
     - Internal directory contains domain code: controllers, services, repositories, and entities.
@@ -23,7 +23,7 @@ These are the main features system:
 - Valid filters are managed by entity tags using validator library. 
 - Current active filters: id, name, color, country.
 
-Fruit Filter responses:
+Responses:
 - 200 Status OK: returns fruits filtered list
 - 206 Partial Content: returns fruits filtered  partial list and reader parser errors(invalid csv file data!!)	
 - 422 Unprocessable Entity : returns param filter and value errors
@@ -31,7 +31,10 @@ Fruit Filter responses:
 - 400 Bad Request: default errors
 
 ## Filter Service
-
+Get Filtered Fruits from the repository. Invalid filter returns empty fruits list with error.
+- Refactoring by filter. 
+- Repository error propagation support
+- If repository parse reader error exists, returns partial fruits list, with default values, and parser error validations
 
 ## Reader Repository 
 Parser Fruit Reader: Go through 2 libraries(csv,validate) to guarantee csv data integrity. Input data method
