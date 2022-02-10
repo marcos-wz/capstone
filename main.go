@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/marcos-wz/capstone/internal/controller"
@@ -9,11 +11,14 @@ import (
 )
 
 func main() {
-
+	// Port
+	// NOTE: should i use environment variable, USE VIPER
+	port := 8080
 	// Repo csv file path
 	const csvFile string = "data/fruits.csv"
 	// const csvFile string = "data/test/csv/fruits-test-error.csv"
-	// var csvFile = os.Get("CSV_FILE") // NOTE: should i use environment variable, USE VIPER
+	// NOTE: should i use environment variable, USE VIPER
+	// var csvFile = os.Get("CSV_FILE")
 
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -26,5 +31,5 @@ func main() {
 	// Handlers
 	e.GET("/v1/fruit/:filter/:value", filterController.FilterFruit)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
 }
