@@ -18,7 +18,8 @@ import (
 // DOMAIN ***********************************************
 
 type iReaderRepo interface {
-	// Read all fruit records from the csv file
+	// Reader repository interface, read all fruit records from the csv file, and guarantee csv data integrity.
+	// This interface is based on encoding/csv and playground/validator libraries.
 	ReadFruits() ([]entity.Fruit, *entity.ReadFruitsError)
 }
 
@@ -54,8 +55,8 @@ func (rp *readerRepo) ReadFruits() ([]entity.Fruit, *entity.ReadFruitsError) {
 		record, err := csvReader.Read()
 		// End of file, returns the parsed fruit records found in file
 		if err == io.EOF {
-			// if parser error exists, returns the partial parsed fruits, with default values set and the field error
-			// with "parser error:"
+			// if parser validation errors exists, returns the partial parsed fruits, with default values set and the field error validations
+			// NOTE: this is a lost data error, taking some actions should be important
 			if len(parserErrors) > 0 {
 				return fruits, &entity.ReadFruitsError{
 					Type:         "Repo.ParserError",
@@ -80,7 +81,7 @@ func (rp *readerRepo) ReadFruits() ([]entity.Fruit, *entity.ReadFruitsError) {
 					Error:      vErr.Error(),
 				})
 			}
-			// Append the parsed record errors
+			// Append the parsed record validations errors
 			parserErrors = append(parserErrors, entity.ParseFruitRecordCSVError{
 				Record: numRecord, Errors: fieldErrs,
 			})
@@ -97,11 +98,11 @@ func (rp *readerRepo) ReadFruits() ([]entity.Fruit, *entity.ReadFruitsError) {
 	}
 }
 
-// Input data method. Always returns a valid fruit.
+// Parser Fruit Record function, guarantee csv data integrity. It parse from csv records to fruit instance
+// This is an input data method. Always returns a fruit instance.
 // If an error occurs, the default type value is set.
-// Params:
-//	- record : the string array csv library format record from file
-//	- numFields : the number of entity struct fields
+// Parameters: 1) A record string array from csv file, 2) The number of fruit entity struct fields
+// Returns a fruit entity instance and parse validation errors
 func (*readerRepo) parseFruitCSV(record []string, numFields int) (*entity.Fruit, error) {
 	// Initial values
 	fruit := &entity.Fruit{}
