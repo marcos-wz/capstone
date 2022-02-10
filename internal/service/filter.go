@@ -12,13 +12,8 @@ import (
 // DOMAIN ***************************************************************************
 
 type iFilterService interface {
-	// Get Filtered Fruits from the repository, refactor by filter.
-	// PARAMS:
-	//	- Valid Filter
-	// RETURNS:
-	//	- List of fruits
-	//	- Repository error propagation support
-	//  - If repository parse reader error exists, returns partial fruits list, with default values, and parser error validations
+	// Get Filtered Fruits from the repository, refactor by filter. Repository error propagation support
+	// Param: a valid Filter. Return: List of fruits and errors.
 	GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, *entity.FruitFilterError)
 }
 
@@ -73,7 +68,7 @@ func (f *filterService) GetFilteredFruits(filter *entity.FruitsFilterParams) ([]
 	return filteredFruits, nil
 }
 
-// return fruits by filter, if not valid filter returns 0
+// return fruits by filter, if not valid filter returns an empty list
 func (f *filterService) filterFactory(fruits []entity.Fruit, filter *entity.FruitsFilterParams) ([]entity.Fruit, error) {
 	switch filter.Filter {
 	case "id":
