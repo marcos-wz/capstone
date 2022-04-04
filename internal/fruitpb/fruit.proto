@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+package fruit;
+option go_package = "internal/fruitpb";
+
+
+// FRUIT ---------------------------------------------
+
+enum weightUnit {
+    KG = 0;
+    LB = 1;
+}
+
+message Fruit {
+    uint32 id = 1;
+    string name = 2;
+    string description = 3;
+    string color = 4;
+    weightUnit unit = 5;
+    float price = 6;
+    uint32 stock = 7;
+    uint32 caducate_days = 8;
+    string country = 9;
+    string created_at = 10;
+    string updated_at = 11;
+}
+
+// FILTER ---------------------------------------------
+
+enum filtersAllowed {
+    ID = 0 ;
+    NAME = 1 ;
+    COLOR = 2 ;
+    COUNTRY = 3 ;
+}
+
+message FilterRequest {
+    filtersAllowed filter = 1 ;
+    string value = 2 ;
+}
+
+message FilterResponse {
+    int32 code = 1 ;
+    string error = 2 ;
+    repeated Fruit fruits = 3 ;
+    repeated ReadRecordCSVError read_record_csv_errors = 4 ;
+    // Fruit fruit = 1;
+}
+
+// READER ---------------------------------------------
+
+message ParseFieldCSVError {
+	string field = 1 ;
+	string value = 2 ;
+	string validation = 3 ; 
+	string error = 4 ;
+}
+
+message ParseRecordCSVError {
+	uint32 record = 1 ;
+	repeated ParseFieldCSVError errors = 2 ;
+}
+
+message ReadRecordCSVError {
+	string type = 1 ;
+	string error = 2 ;
+	repeated ParseRecordCSVError parser_errors = 3 ;
+}
+
+// LOADER ---------------------------------------------
+message LoaderRequest {
+
+}
+
+message LoaderResponse {
+
+}
+
+
+// Filter Concurrency --------------------
+message FilterCCRequest {
+
+}
+
+message FilterCCResponse {
+
+}
+
+
+// SERVICE *******************************************
+
+service FruitService {
+    rpc Filter(FilterRequest) returns (FilterResponse) {};
+    // rpc Loader(LoaderRequest) returns (LoaderResponse) {};
+    // rpc FilterCC(FilterCCRequest) returns (FilterCCResponse) {};
+}
