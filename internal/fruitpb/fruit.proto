@@ -28,10 +28,12 @@ message Fruit {
 // FILTER ---------------------------------------------
 
 enum filtersAllowed {
-    ID = 0 ;
-    NAME = 1 ;
-    COLOR = 2 ;
-    COUNTRY = 3 ;
+    UNDEFINED = 0;
+    ID = 1 ;
+    NAME = 2 ;
+    COLOR = 3 ;
+    COUNTRY = 4 ;
+
 }
 
 message FilterRequest {
