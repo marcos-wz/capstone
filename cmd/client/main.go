@@ -2,41 +2,52 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
-	"time"
 
-	"golang.org/x/net/context"
+	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	pb "github.com/marcos-wz/capstone/internal/fruitpb"
-)
-
-var (
-	addr = flag.String("addr", "localhost:50051", "the address to connect to")
+	"github.com/marcos-wz/capstone/internal/client"
 )
 
 func main() {
+	// Command Line Flags
+	servicePtr := flag.String("service", "", "the service to be requested")
+	filterPtr := flag.String("filter", "", "the filter parameter")
+	filterValuePtr := flag.String("filter-value", "", "the filter value parameter")
 	flag.Parse()
+
+	// Config
+	viper.SetConfigName("client")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath("./configs/")
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalf("fatal error config file: server \n %v", err)
+	}
+
 	// Set up a connection to the server
-	conn, err := grpc.Dial(*addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	addr := fmt.Sprintf("%v:%d", viper.GetString("client.host_target"), viper.GetInt("client.port"))
+	log.Printf("Connecting to %v", addr)
+	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	c := pb.NewFruitServiceClient(conn)
 
-	//Conact the server and print out its response.
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	r, err := c.Filter(ctx, &pb.FilterRequest{
-		Filter: pb.FiltersAllowed_COLOR,
-		Value:  "green",
-	})
-	if err != nil {
-		log.Fatalf("could not filter: %v", err)
+	// Setup client
+	c := client.NewClient(conn)
+
+	// Services
+	switch *servicePtr {
+	case "filter":
+		c.Filter(*filterPtr, *filterValuePtr)
+	case "loader":
+		c.Loader()
+	case "filterCC":
+		c.FilterCC(*filterPtr, *filterValuePtr)
+	default:
+		log.Fatalf("FATAL: service %q not found", *servicePtr)
 	}
-	log.Printf("Resp Code: %d", r.GetCode())
-	log.Printf("Resp Fruits: %s", r.GetFruits())
-	// log.Printf("Resp Code: %d", r.GetCode())
 }
