@@ -1,0 +1,3 @@
+client:
+  host_target: "localhost"
+  port: 50051
