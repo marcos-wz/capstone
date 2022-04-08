@@ -1,51 +1,47 @@
 package main
 
 import (
-	"context"
-	"flag"
 	"fmt"
 	"log"
 	"net"
 
-	pb "github.com/marcos-wz/capstone/internal/fruitpb"
 	"google.golang.org/grpc"
+
+	pb "github.com/marcos-wz/capstone/internal/fruitpb"
+	"github.com/marcos-wz/capstone/internal/repository"
+	"github.com/marcos-wz/capstone/internal/server"
+	"github.com/marcos-wz/capstone/internal/service"
+	"github.com/spf13/viper"
 )
-
-var (
-	port = flag.Int("port", 50051, "The server port")
-)
-
-type server struct {
-	pb.UnimplementedFruitServiceServer
-}
-
-func (*server) Filter(ctx context.Context, req *pb.FilterRequest) (*pb.FilterResponse, error) {
-	log.Printf("Filter Request: %v", req)
-	resp := &pb.FilterResponse{
-		Code: 200,
-		Fruits: []*pb.Fruit{
-			{
-				Id:          1,
-				Name:        "Pera",
-				Description: "Fruta tropical",
-				Color:       "green",
-				// Unit: "lb",0,0,0,Canada,2022-02-01T12:14:05-06:00
-			},
-		},
-	}
-	return resp, nil
-}
 
 func main() {
-	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+
+	// Config
+	viper.SetConfigName("server")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath("./configs/")
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalf("fatal error config file: server \n %v", err)
+	}
+
+	// Server Services
+	readerRepo := repository.NewReaderRepo(viper.GetString("data.csv"))
+	filterSvc := service.NewFilterService(readerRepo)
+
+	serverServices := server.NewServerServices(filterSvc, nil, nil)
+
+	// Listener
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", viper.GetInt("server.port")))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
+	// Server
 	s := grpc.NewServer()
-	pb.RegisterFruitServiceServer(s, &server{})
+	pb.RegisterFruitServiceServer(s, serverServices)
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+
 }
