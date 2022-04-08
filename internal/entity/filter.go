@@ -2,8 +2,8 @@ package entity
 
 // PARAMS
 type FruitsFilterParams struct {
-	Filter string `validate:"oneof=id name color country"`
-	Value  string `validate:"required,alphanum"`
+	Filter string `validate:"required,alpha"`
+	Value  string `validate:"required,alpha"`
 }
 
 // ERRORS
