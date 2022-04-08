@@ -1,0 +1,8 @@
+# default server configuration
+server:
+  port: 50051
+
+data:
+  csv: "data/fruits.csv"
+  # "data/test/csv/fruits-test-error.csv"
+  json: "data/fruits.json"
