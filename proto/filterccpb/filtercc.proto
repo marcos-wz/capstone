@@ -1,0 +1,11 @@
+syntax = "proto3" ;
+package capstone;
+option go_package = "github.com/marcos-wz/capstone/proto/filterccpb";
+
+message FilterCCRequest {
+
+}
+
+message FilterCCResponse {
+
+}

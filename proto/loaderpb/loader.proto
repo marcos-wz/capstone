@@ -1,0 +1,9 @@
+syntax = "proto3";
+package capstone;
+option go_package = "github.com/marcos-wz/capstone/proto/loaderpb";
+
+message LoaderRequest {
+}
+
+message LoaderResponse {
+}
