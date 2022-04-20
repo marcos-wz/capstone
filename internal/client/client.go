@@ -1,9 +1,10 @@
 package client
 
 import (
+	"github.com/marcos-wz/capstone/proto/filterpb"
+	"github.com/marcos-wz/capstone/proto/fruitpb"
 	"strings"
 
-	pb "github.com/marcos-wz/capstone/internal/fruitpb"
 	"google.golang.org/grpc"
 )
 
@@ -15,27 +16,27 @@ type iClient interface {
 }
 
 type client struct {
-	service pb.FruitServiceClient
+	service fruitpb.FruitServiceClient
 }
 
 func NewClient(conn *grpc.ClientConn) iClient {
 	return &client{
-		service: pb.NewFruitServiceClient(conn),
+		service: fruitpb.NewFruitServiceClient(conn),
 	}
 }
 
 // IMPLEMENTATION
-func (*client) getAllowedFilter(value string) pb.FiltersAllowed {
+func (*client) getAllowedFilter(value string) filterpb.FiltersAllowed {
 	switch strings.ToUpper(value) {
 	case "ID":
-		return pb.FiltersAllowed_ID
+		return filterpb.FiltersAllowed_FILTER_ID
 	case "NAME":
-		return pb.FiltersAllowed_NAME
+		return filterpb.FiltersAllowed_FILTER_NAME
 	case "COLOR":
-		return pb.FiltersAllowed_COLOR
+		return filterpb.FiltersAllowed_FILTER_COLOR
 	case "COUNTRY":
-		return pb.FiltersAllowed_COUNTRY
+		return filterpb.FiltersAllowed_FILTER_COUNTRY
 	default:
-		return pb.FiltersAllowed_UNDEFINED
+		return filterpb.FiltersAllowed_FILTER_UNDEFINED
 	}
 }
