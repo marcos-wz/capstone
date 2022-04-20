@@ -2,11 +2,18 @@ package server
 
 import (
 	"context"
+	"github.com/marcos-wz/capstone/proto/basepb"
 	"github.com/marcos-wz/capstone/proto/filterpb"
+	"log"
 )
 
 func (*server) Filter(ctx context.Context, in *filterpb.FilterRequest) (*filterpb.FilterResponse, error) {
-	return nil, nil
+	log.Println("RPC Filter starting...")
+	return &filterpb.FilterResponse{
+		Fruit: &basepb.Fruit{
+			Name: "fruit test",
+		},
+	}, nil
 }
 
 // Get fruits filtered from the service
