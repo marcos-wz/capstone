@@ -14,10 +14,17 @@ import (
 
 func main() {
 	// Command Line Flags
-	servicePtr := flag.String("service", "", "the service to be requested")
-	filterPtr := flag.String("filter", "", "the filter parameter")
-	filterValuePtr := flag.String("filter-value", "", "the filter value parameter")
+	debugPtr := flag.Bool("debug", false, "Display any debugging information")
+	servicePtr := flag.String("service", "", "Name service to be requested")
+	filterPtr := flag.String("filter", "", "Filter parameter")
+	filterValuePtr := flag.String("filter-value", "", "Filter value parameter")
+
 	flag.Parse()
+
+	// Flags Input validations, service is mandatory
+	if *servicePtr == "" {
+		log.Fatal("FATAL: service option is mandatory")
+	}
 
 	// Config
 	viper.SetConfigName("client")
@@ -29,7 +36,9 @@ func main() {
 
 	// Set up a connection to the server
 	addr := fmt.Sprintf("%v:%d", viper.GetString("client.host_target"), viper.GetInt("client.port"))
-	log.Printf("Connecting to %v", addr)
+	if *debugPtr {
+		log.Printf("Connecting to %v", addr)
+	}
 	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -39,7 +48,7 @@ func main() {
 	// Setup client
 	c := client.NewClient(conn)
 
-	// Services
+	// Run services
 	switch *servicePtr {
 	case "filter":
 		c.Filter(*filterPtr, *filterValuePtr)
