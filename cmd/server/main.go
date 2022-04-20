@@ -2,15 +2,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/marcos-wz/capstone/proto/fruitpb"
 	"log"
 	"net"
 
 	"google.golang.org/grpc"
 
-	pb "github.com/marcos-wz/capstone/internal/fruitpb"
-	"github.com/marcos-wz/capstone/internal/repository"
 	"github.com/marcos-wz/capstone/internal/server"
-	"github.com/marcos-wz/capstone/internal/service"
 	"github.com/spf13/viper"
 )
 
@@ -25,10 +23,11 @@ func main() {
 	}
 
 	// Server Services
-	readerRepo := repository.NewReaderRepo(viper.GetString("data.csv"))
-	filterSvc := service.NewFilterService(readerRepo)
-
-	serverServices := server.NewServerServices(filterSvc, nil, nil)
+	//readerRepo := repository.NewReaderRepo(viper.GetString("data.csv"))
+	//filterSvc := service.NewFilterService(readerRepo)
+	//
+	//serverServices := server.NewServer(filterSvc, nil, nil)
+	srv := server.NewServer()
 
 	// Listener
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", viper.GetInt("server.port")))
@@ -38,7 +37,7 @@ func main() {
 
 	// Server
 	s := grpc.NewServer()
-	pb.RegisterFruitServiceServer(s, serverServices)
+	fruitpb.RegisterFruitServiceServer(s, srv)
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
