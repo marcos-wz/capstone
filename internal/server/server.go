@@ -1,35 +1,24 @@
 package server
 
 import (
-	"github.com/marcos-wz/capstone/internal/entity"
-	pb "github.com/marcos-wz/capstone/internal/fruitpb"
+	"github.com/marcos-wz/capstone/proto/fruitpb"
 )
 
-type FilterService interface {
-	GetFilteredFruits(filter *entity.FruitsFilterParams) ([]entity.Fruit, *entity.FruitFilterError)
-}
+type server struct {
+	// Services
+	//filterService   FilterService
+	//loaderService   LoaderService
+	//filterCCService FilterCCService
 
-type LoaderService interface {
-}
-
-type FilterCCService interface {
+	fruitpb.UnimplementedFruitServiceServer
 }
 
 // Buider server
-func NewServerServices(filterSvc FilterService, loaderSvc LoaderService, filterCCSvc FilterCCService) *server {
+//func NewServer(filterSvc FilterService, loaderSvc LoaderService, filterCCSvc FilterCCService) *server {
+func NewServer() *server {
 	return &server{
-		filterService:   filterSvc,
-		loaderService:   loaderSvc,
-		filterCCService: filterCCSvc,
+		//filterService:   filterSvc,
+		//loaderService:   loaderSvc,
+		//filterCCService: filterCCSvc,
 	}
-}
-
-type server struct {
-
-	// Services
-	filterService   FilterService
-	loaderService   LoaderService
-	filterCCService FilterCCService
-
-	pb.UnimplementedFruitServiceServer
 }
