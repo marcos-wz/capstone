@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/marcos-wz/capstone/internal/repository"
+	"github.com/marcos-wz/capstone/internal/service"
 	"github.com/marcos-wz/capstone/proto/fruitpb"
 	"log"
 	"net"
@@ -22,12 +24,12 @@ func main() {
 		log.Fatalf("fatal error config file: server \n %v", err)
 	}
 
-	// Server Services
-	//readerRepo := repository.NewReaderRepo(viper.GetString("data.csv"))
-	//filterSvc := service.NewFilterService(readerRepo)
-	//
-	//serverServices := server.NewServer(filterSvc, nil, nil)
-	srv := server.NewServer()
+	// Fruit repository
+	repo := repository.NewFruitRepo(viper.GetString("data.csv"), viper.GetString("external-api.fruits"))
+	// Fruit service
+	svc := service.NewFruitService(repo)
+	// Server builder
+	srv := server.NewServer(svc)
 
 	// Listener
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", viper.GetInt("server.port")))
