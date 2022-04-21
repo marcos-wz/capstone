@@ -7,18 +7,7 @@ import (
 	"log"
 )
 
-func (*server) Filter(ctx context.Context, in *filterpb.FilterRequest) (*filterpb.FilterResponse, error) {
-	log.Println("RPC Filter starting...")
-	return &filterpb.FilterResponse{
-		Fruit: &basepb.Fruit{
-			Name: "fruit test",
-		},
-	}, nil
-}
-
-// Get fruits filtered from the service
-// Always return json reponses.
-// Only valid filters and values are allowed.
+// Filter gets fruits filtered from the service. Only valid filters and values are allowed.
 // PARAMS:
 // 	- filter: the field filter request - filters allowed: id, name, color, country
 //	- value: the filter value request
@@ -28,9 +17,20 @@ func (*server) Filter(ctx context.Context, in *filterpb.FilterRequest) (*filterp
 //	- 422 Unprocessable Entity : returns param filter and value errors
 //	- 500 Internal Server : returns reader CSV File error (critical!)
 //	- 400 Bad Request: default errors
+func (s *server) Filter(ctx context.Context, filterReq *filterpb.FilterRequest) (*filterpb.FilterResponse, error) {
+	log.Println("RPC Filter: starting...")
+	log.Printf("RPC Filter: filter request: %+v", filterReq)
+	s.service.GetFilteredFruits(filterReq)
+	// *************************************
+	return &filterpb.FilterResponse{
+		Fruit: &basepb.Fruit{
+			Name: "fruit test",
+		},
+	}, nil
+}
 
 //func (s *server) Filter(ctx context.Context, req *pb.FilterRequest) (*pb.FilterResponse, error) {
-//	log.Printf("Filter Request: %+v", req)
+
 //	// Filter request validation. Invalid filter response unprocessable entity
 //	filter := &entity.FruitsFilterParams{
 //		Filter: req.GetFilter().String(),
