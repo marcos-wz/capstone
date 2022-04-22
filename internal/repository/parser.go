@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"github.com/go-playground/validator"
 	"github.com/marcos-wz/capstone/proto/basepb"
 	"log"
 	"strconv"
@@ -16,7 +17,7 @@ import (
 // 		- numFields: The number of fruit fields
 // RETURNS:
 //		- parsed fruit instance
-//		- validation parsed array of errors
+//		- input validation parsed array of errors
 func parseFruitCSV(record []string, numFields int) (*basepb.Fruit, []error) {
 	log.Println("REPO: parse fruit to csv starting...")
 	// Values initialization
@@ -25,35 +26,34 @@ func parseFruitCSV(record []string, numFields int) (*basepb.Fruit, []error) {
 	copy(values, record)
 	errors := make([]error, numFields)
 
-	// Fruit Instance ---------------------------------------------
+	// Fruit Instance parse and validator ---------------------------------------------
+	// use a single instance of Validate, it caches struct info
+	var validate *validator.Validate
 	// 0 - ID
-	ID, err := strconv.ParseUint(values[0], 10, 32)
-	if err != nil {
-		log.Printf("ERROR-Parser: parsing ID %q: %v", ID, err)
+	if err := validate.Var(values[0], "required,numeric,gt=0"); err != nil {
+		log.Printf("REPO ERROR: CSV parser: ID %q: %v", values[0], err)
 		errors[0] = err
 	} else {
+		ID, _ := strconv.ParseUint(values[0], 10, 32)
 		fruit.Id = uint32(ID)
 	}
 	// 1 - NAME
-	if values[1] == "" {
-		err := fmt.Errorf("empty string")
-		log.Printf("REPO-ERROR: CSV parser: %v", err)
+	if err := validate.Var(values[1], "required,alpha,gt=2"); err != nil {
+		log.Printf("REPO-ERROR: CSV parser: NAME %q: %v", values[1], err)
 		errors[1] = err
 	} else {
 		fruit.Name = values[1]
 	}
 	// 2 - DESCRIPTION
-	if values[2] == "" {
-		err := fmt.Errorf("empty string")
-		log.Printf("REPO-ERROR: CSV parser: %v", err)
+	if err := validate.Var(values[2], "omitempty,printascii,gt=2"); err != nil {
+		log.Printf("REPO-ERROR: CSV parser: DESCRIPTION %q: %v", values[2], err)
 		errors[2] = err
 	} else {
 		fruit.Description = values[2]
 	}
 	// 3 - COLOR
-	if values[3] == "" {
-		err := fmt.Errorf("empty string")
-		log.Printf("REPO-ERROR: CSV parser: %v", err)
+	if err := validate.Var(values[3], "required,alpha,gt=2"); err != nil {
+		log.Printf("REPO-ERROR: CSV parser: COLOR %q: %v", values[3], err)
 		errors[3] = err
 	} else {
 		fruit.Color = values[3]
@@ -66,11 +66,11 @@ func parseFruitCSV(record []string, numFields int) (*basepb.Fruit, []error) {
 		errors[4] = err
 	}
 	// 5 - PRICE
-	price, err := strconv.ParseFloat(values[5], 32)
-	if err != nil {
-		log.Printf("REPO-ERROR: CSV parser: %v", err)
+	if err := validate.Var(values[5], "required,numeric"); err != nil {
+		log.Printf("REPO-ERROR: CSV parser: price %q: %v", values[5], err)
 		errors[5] = err
 	} else {
+		price, _ := strconv.ParseFloat(values[5], 32)
 		fruit.Price = float32(price)
 	}
 	// 6 - CURRENCY
@@ -81,19 +81,19 @@ func parseFruitCSV(record []string, numFields int) (*basepb.Fruit, []error) {
 		errors[6] = err
 	}
 	// 7 - STOCK
-	stock, err := strconv.ParseUint(values[7], 10, 32)
-	if err != nil {
-		log.Printf("REPO-ERROR: CSV parser: %v", err)
+	if err := validate.Var(values[7], "required,numeric"); err != nil {
+		log.Printf("REPO-ERROR: CSV parser: STOCK %q: %v", values[7], err)
 		errors[7] = err
 	} else {
+		stock, _ := strconv.ParseUint(values[7], 10, 32)
 		fruit.Stock = uint32(stock)
 	}
 	// 8 - CADUCATE DAYS
-	caducateDays, err := strconv.ParseUint(values[8], 10, 32)
-	if err != nil {
-		log.Printf("REPO-ERROR: CSV parser: %v", err)
+	if err := validate.Var(values[8], "required,numeric"); err != nil {
+		log.Printf("REPO-ERROR: CSV parser: CADUCATE DAYS %q: %v", values[8], err)
 		errors[8] = err
 	} else {
+		caducateDays, _ := strconv.ParseUint(values[8], 10, 32)
 		fruit.CaducateDays = uint32(caducateDays)
 	}
 	// 9 - COUNTRY
@@ -104,16 +104,18 @@ func parseFruitCSV(record []string, numFields int) (*basepb.Fruit, []error) {
 		errors[8] = err
 	}
 	// 10 - CREATE TIME
-	fruit.CreateTime, err = strconv.ParseUint(values[10], 10, 64)
-	if err != nil {
-		log.Printf("REPO-ERROR: CSV parser: %v", err)
+	if err := validate.Var(values[10], "required,numeric"); err != nil {
+		log.Printf("REPO-ERROR: CSV parser: CREATE TIME %q: %v", values[10], err)
 		errors[10] = err
+	} else {
+		fruit.CreateTime, _ = strconv.ParseUint(values[10], 10, 64)
 	}
 	// 11 - UPDATE TIME
-	fruit.UpdateTime, err = strconv.ParseUint(values[11], 10, 64)
-	if err != nil {
-		log.Printf("REPO-ERROR: CSV parser: %v", err)
+	if err := validate.Var(values[11], "required,numeric"); err != nil {
+		log.Printf("REPO-ERROR: CSV parser: UPDATE TIME %q: %v", values[11], err)
 		errors[10] = err
+	} else {
+		fruit.UpdateTime, _ = strconv.ParseUint(values[11], 10, 64)
 	}
 
 	return fruit, errors
