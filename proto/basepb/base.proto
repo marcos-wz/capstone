@@ -3,12 +3,6 @@ syntax = "proto3" ;
 package capstone;
 option go_package = "github.com/marcos-wz/capstone/proto/basepb";
 
-enum Unit {
-  UNIT_UNDEFINED = 0;
-  UNIT_KG = 1;
-  UNIT_LB = 2;
-}
-
 message Fruit {
   uint32 id = 1;
   string name = 2;
@@ -16,12 +10,34 @@ message Fruit {
   string color = 4;
   Unit unit = 5;
   float price = 6;
-  uint32 stock = 7;
-  uint32 caducate_days = 8;
-  string country = 9;
+  Currency currency = 7;
+  uint32 stock = 8;
+  uint32 caducate_days = 9;
+  Country country = 10;
   // Create time time in microseconds (µs).
-  uint64 create_time = 10;
+  uint64 create_time = 11;
   // Updated time time in microseconds (µs).
-  uint64 update_time = 11;
+  uint64 update_time = 12;
 }
 
+enum Unit {
+  UNIT_UNDEFINED = 0;
+  UNIT_KG = 1;
+  UNIT_LB = 2;
+}
+
+enum Country {
+  COUNTRY_UNDEFINED = 0;
+  COUNTRY_MEXICO = 1;
+  COUNTRY_BRAZIL = 2;
+  COUNTRY_CANADA = 3;
+  COUNTRY_USA = 4;
+}
+
+enum Currency {
+  CURRENCY_UNDEFINED = 0;
+  CURRENCY_MXN = 1;
+  CURRENCY_BRL = 2;
+  CURRENCY_CAD = 3;
+  CURRENCY_USD = 4;
+}
