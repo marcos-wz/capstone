@@ -7,6 +7,9 @@ import (
 
 // DOMAIN ***********************************************
 
+// flag for displaying debug messages
+var debug bool
+
 type iFruitRepo interface {
 
 	// ReadFruits fruits reader repository, read all fruit records from the
