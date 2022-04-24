@@ -8,7 +8,7 @@ import (
 // DOMAIN ***********************************************
 
 // flag for displaying debug messages
-var debug bool
+var Debug bool
 
 type iFruitRepo interface {
 
