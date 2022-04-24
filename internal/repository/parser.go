@@ -57,7 +57,11 @@ func parseFruitCSV(record []string) (*basepb.Fruit, error) {
 	}
 	// Input Validation
 	if err := validator.New().Struct(fruitRecord); err != nil {
-		log.Printf("REPO-ERROR: record validation: %v", err)
+		validationErrors := err.(validator.ValidationErrors)
+		log.Printf("REPO-ERROR: Record ID(%v) parser validation: ", fruitRecord.Id)
+		for _, e := range validationErrors {
+			log.Printf("Field: %v, Value: %v, Tag: %v, Param: %v", e.StructField(), e.Value(), e.Tag(), e.Param())
+		}
 		return nil, err
 	}
 
@@ -85,7 +89,7 @@ func parseFruitCSV(record []string) (*basepb.Fruit, error) {
 	}, nil
 }
 
-// parseUnit parse a unit, and returns a unit prototype
+// parseUnit returns a parsed protobuf unit
 func parseUnit(unit string) basepb.Unit {
 	switch unit {
 	case "KG":
@@ -93,7 +97,7 @@ func parseUnit(unit string) basepb.Unit {
 	case "LB":
 		return basepb.Unit_UNIT_LB
 	default:
-		log.Printf("REPO-WARNING: units parser: unit %q undefined", unit)
+		log.Printf("REPO-WARNING: parser unit: %q undefined", unit)
 		return basepb.Unit_UNIT_UNDEFINED
 	}
 }
