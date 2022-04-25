@@ -1,4 +1,4 @@
-package repository
+package parser
 
 import (
 	"fmt"
@@ -10,9 +10,7 @@ import (
 	"strings"
 )
 
-// parseFruitCSV guarantee csv data integrity. It parses from csv records to fruit instance.
-// Record parameters is a string array from csv file. Returns a parsed fruit instance or error.
-func parseFruitCSV(record []string) (*basepb.Fruit, error) {
+func (fp *fruitParser) ParseFruitCSVRecord(record []string) (*basepb.Fruit, error) {
 	if Debug {
 		log.Println("REPO: parse fruit to csv starting...")
 		log.Printf("REPO: parser record(%d): %v", len(record), record)
@@ -78,60 +76,13 @@ func parseFruitCSV(record []string) (*basepb.Fruit, error) {
 		Name:         fruitRecord.Name,
 		Description:  fruitRecord.Description,
 		Color:        fruitRecord.Color,
-		Unit:         parseUnit(fruitRecord.Unit),
+		Unit:         fp.ParseUnit(fruitRecord.Unit),
 		Price:        float32(price),
-		Currency:     parseCurrency(fruitRecord.Currency),
+		Currency:     fp.ParseCurrency(fruitRecord.Currency),
 		Stock:        uint32(stock),
 		CaducateDays: uint32(caducateDays),
-		Country:      parseCountry(fruitRecord.Country),
+		Country:      fp.ParseCountry(fruitRecord.Country),
 		CreateTime:   createTime,
 		UpdateTime:   updateTime,
 	}, nil
-}
-
-// parseUnit returns a parsed protobuf unit
-func parseUnit(unit string) basepb.Unit {
-	switch unit {
-	case "KG":
-		return basepb.Unit_UNIT_KG
-	case "LB":
-		return basepb.Unit_UNIT_LB
-	default:
-		log.Printf("REPO-WARNING: parser unit: %q undefined", unit)
-		return basepb.Unit_UNIT_UNDEFINED
-	}
-}
-
-// parseCountry parse a country and returns a unit prototype
-func parseCountry(country string) basepb.Country {
-	switch country {
-	case "MEXICO":
-		return basepb.Country_COUNTRY_MEXICO
-	case "BRAZIL":
-		return basepb.Country_COUNTRY_BRAZIL
-	case "CANADA":
-		return basepb.Country_COUNTRY_CANADA
-	case "USA":
-		return basepb.Country_COUNTRY_USA
-	default:
-		log.Printf("REPO-WARNING: country parser: country %q undefined", country)
-		return basepb.Country_COUNTRY_UNDEFINED
-	}
-}
-
-// parseCurrency parse a currency and returns a currency prototype
-func parseCurrency(currency string) basepb.Currency {
-	switch currency {
-	case "MXN":
-		return basepb.Currency_CURRENCY_MXN
-	case "BRL":
-		return basepb.Currency_CURRENCY_BRL
-	case "CAD":
-		return basepb.Currency_CURRENCY_CAD
-	case "USD":
-		return basepb.Currency_CURRENCY_USD
-	default:
-		log.Printf("REPO-WARNING: currency parser : currency %q undefined", currency)
-		return basepb.Currency_CURRENCY_UNDEFINED
-	}
 }
