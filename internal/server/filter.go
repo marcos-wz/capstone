@@ -18,9 +18,36 @@ import (
 //	- 500 Internal Server : returns reader CSV File error (critical!)
 //	- 400 Bad Request: default errors
 func (s *server) Filter(ctx context.Context, filterReq *filterpb.FilterRequest) (*filterpb.FilterResponse, error) {
-	log.Println("RPC Filter: starting...")
-	log.Printf("RPC Filter: filter request: %+v", filterReq)
+	if Debug {
+		log.Println("RPC Filter: starting...")
+		log.Printf("RPC Filter: filter request: %+v", filterReq)
+	}
+	// SERVICE
 	s.service.GetFilteredFruits(filterReq)
+	//fruits, err := s.service.GetFilteredFruits(filterReq)
+	// Error validations
+	//if err != nil {
+	//	switch err.Type {
+	//	// Repository File Error response: internal server error
+	//	case "Repo.FileError":
+	//		return c.JSON(http.StatusInternalServerError, &entity.ErrorResponse{
+	//			Message: err.Error.Error(),
+	//		})
+	//	// Repository parser error response : partial fruits with parser errors
+	//	case "Repo.ParserError":
+	//		return c.JSON(http.StatusPartialContent, &entity.FruitFilterResponse{
+	//			Fruits:       fruits,
+	//			ParserErrors: err.ParserErrors,
+	//		})
+	//	default:
+	//		// Default error response
+	//		return c.JSON(http.StatusBadRequest, &entity.ErrorResponse{
+	//			Message: err.Error.Error(),
+	//		})
+	//	}
+	//}
+	// Successful response
+
 	// *************************************
 	return &filterpb.FilterResponse{
 		Fruit: &basepb.Fruit{
