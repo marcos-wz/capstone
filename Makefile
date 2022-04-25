@@ -41,4 +41,7 @@ gen-fruit:
 		--proto_path=$(SCHEMAS_SRC)/fruitpb/ \
 		 fruit.proto
 
+mocks:
+	mockery --name=FruitRepo --srcpkg=./internal/service --output=./internal/service/mocks
+
 generate: gen-base gen-filter gen-loader gen-filtercc gen-fruit
