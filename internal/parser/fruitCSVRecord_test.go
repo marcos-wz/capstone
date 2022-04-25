@@ -1,4 +1,4 @@
-package repository
+package parser
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestRepo_ParseFruitCSV(t *testing.T) {
+func TestRepo_ParseFruitCSVRecord(t *testing.T) {
 	var testCases = []struct {
 		name   string
 		record []string
@@ -120,125 +120,9 @@ func TestRepo_ParseFruitCSV(t *testing.T) {
 	// RUN TESTS --------------------------------
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			fruit, err := parseFruitCSV(tc.record)
+			fruit, err := NewFruitParser().ParseFruitCSVRecord(tc.record)
 			assert.Equal(t, tc.resp, fruit)
 			assert.Equal(t, tc.err, fmt.Sprintf("%v", err))
-		})
-	}
-}
-
-func TestRepo_ParseUnit(t *testing.T) {
-	var testCases = []struct {
-		name     string
-		unit     string
-		response basepb.Unit
-	}{
-		{
-			"Should return `LB` unit",
-			"LB",
-			basepb.Unit_UNIT_LB,
-		},
-		{
-			"Should return `KG` unit",
-			"KG",
-			basepb.Unit_UNIT_KG,
-		},
-		{
-			"Should return `UNDEFINED` unit",
-			"fake-unit",
-			basepb.Unit_UNIT_UNDEFINED,
-		},
-	}
-	// RUN TESTS --------------------------------
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			resp := parseUnit(tc.unit)
-			assert.Equal(t, tc.response, resp)
-			t.Logf("Parsed unit %q : %v", tc.unit, resp)
-		})
-	}
-}
-
-func TestRepo_ParseCountry(t *testing.T) {
-	var testCases = []struct {
-		name     string
-		country  string
-		response basepb.Country
-	}{
-		{
-			"Should return `MEXICO` country",
-			"MEXICO",
-			basepb.Country_COUNTRY_MEXICO,
-		},
-		{
-			"Should return `BRAZIL` country",
-			"BRAZIL",
-			basepb.Country_COUNTRY_BRAZIL,
-		},
-		{
-			"Should return `CANADA` country",
-			"CANADA",
-			basepb.Country_COUNTRY_CANADA,
-		},
-		{
-			"Should return `USA` country",
-			"USA",
-			basepb.Country_COUNTRY_USA,
-		},
-		{
-			"Should return `UNDEFINED` country",
-			"fake-country",
-			basepb.Country_COUNTRY_UNDEFINED,
-		},
-	}
-	// RUN TESTS --------------------------------
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			resp := parseCountry(tc.country)
-			assert.Equal(t, tc.response, resp)
-			t.Logf("Parsed country %q : %v", tc.country, resp)
-		})
-	}
-}
-
-func TestRepo_ParseCurrency(t *testing.T) {
-	var testCases = []struct {
-		name     string
-		currency string
-		response basepb.Currency
-	}{
-		{
-			"Should return `MNX` currency",
-			"MXN",
-			basepb.Currency_CURRENCY_MXN,
-		},
-		{
-			"Should return `BRL` currency",
-			"BRL",
-			basepb.Currency_CURRENCY_BRL,
-		},
-		{
-			"Should return `CAD` currency",
-			"CAD",
-			basepb.Currency_CURRENCY_CAD,
-		},
-		{
-			"Should return `USD` currency",
-			"USD",
-			basepb.Currency_CURRENCY_USD,
-		},
-		{
-			"Should return `UNDEFINED` currency",
-			"fake-currency",
-			basepb.Currency_CURRENCY_UNDEFINED,
-		},
-	}
-	// RUN TESTS --------------------------------
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			resp := parseCurrency(tc.currency)
-			assert.Equal(t, tc.response, resp)
-			t.Logf("Parsed country %q : %v", tc.currency, resp)
 		})
 	}
 }
