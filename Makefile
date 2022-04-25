@@ -43,5 +43,6 @@ gen-fruit:
 
 mocks:
 	mockery --name=FruitRepo --srcpkg=./internal/service --output=./internal/service/mocks
+	mockery --name=FruitService --srcpkg=./internal/server --output=./internal/server/mocks
 
 generate: gen-base gen-filter gen-loader gen-filtercc gen-fruit
