@@ -2,6 +2,7 @@ package repository
 
 import (
 	"encoding/csv"
+	"github.com/marcos-wz/capstone/internal/parser"
 	pb "github.com/marcos-wz/capstone/proto/basepb"
 	"io"
 	"log"
@@ -26,6 +27,7 @@ func (rp *fruitRepo) ReadFruits() ([]*pb.Fruit, error) {
 
 	// CSV
 	csvReader := csv.NewReader(f)
+	fp := parser.NewFruitParser()
 	var fruits []*pb.Fruit
 	// Load from record
 	for {
@@ -35,7 +37,7 @@ func (rp *fruitRepo) ReadFruits() ([]*pb.Fruit, error) {
 			return fruits, nil
 		}
 		// Add parsed fruit to the list
-		fruit, err := parseFruitCSV(record)
+		fruit, err := fp.ParseFruitCSVRecord(record)
 		// NOTE: this is a lost data error, must log to a log server(Datadog)
 		if err != nil {
 			continue
