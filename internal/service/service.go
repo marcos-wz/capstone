@@ -1,7 +1,7 @@
 package service
 
 import (
-	pb "github.com/marcos-wz/capstone/proto/basepb"
+	"github.com/marcos-wz/capstone/proto/basepb"
 	"github.com/marcos-wz/capstone/proto/filterpb"
 )
 
@@ -11,14 +11,14 @@ type FruitService interface {
 
 	// GetFilteredFruits gets Filtered Fruits from the repository, refactor by filter. Repository error propagation support
 	// Param: a valid Filter. Return: List of fruits and errors.
-	GetFilteredFruits(filter *filterpb.FilterRequest) ([]*pb.Fruit, error)
+	GetFilteredFruits(filter *filterpb.FilterRequest) ([]*basepb.Fruit, error)
 }
 
 // FruitRepo Mock dependency injection
 type FruitRepo interface {
-	ReadFruits() ([]*pb.Fruit, error)
-	FetchFruits() ([]*pb.Fruit, error)
-	WriteFruits(fruits []*pb.Fruit) error
+	ReadFruits() ([]*basepb.Fruit, error)
+	FetchFruits() ([]*basepb.Fruit, error)
+	WriteFruits(fruits []*basepb.Fruit) error
 }
 
 type fruitService struct {
