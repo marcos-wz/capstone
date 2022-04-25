@@ -1,29 +1,30 @@
 package service
 
 import (
-	"github.com/marcos-wz/capstone/internal/entity"
 	pb "github.com/marcos-wz/capstone/proto/basepb"
 	"github.com/marcos-wz/capstone/proto/filterpb"
 )
 
-// DOMAIN ***********************************************
+var Debug bool
 
-type iFruitService interface {
+type FruitService interface {
+
 	// GetFilteredFruits gets Filtered Fruits from the repository, refactor by filter. Repository error propagation support
 	// Param: a valid Filter. Return: List of fruits and errors.
-	GetFilteredFruits(filter *filterpb.FilterRequest) ([]*pb.Fruit, *entity.FruitFilterError)
+	GetFilteredFruits(filter *filterpb.FilterRequest) ([]*pb.Fruit, error)
 }
 
-type fruitRepo interface {
-	ReadFruits() ([]*pb.Fruit, *entity.ReadFruitsError)
+// FruitRepo Mock dependency injection
+type FruitRepo interface {
+	ReadFruits() ([]*pb.Fruit, error)
 	FetchFruits() ([]*pb.Fruit, error)
 	WriteFruits(fruits []*pb.Fruit) error
 }
 
 type fruitService struct {
-	repo fruitRepo
+	repo FruitRepo
 }
 
-func NewFruitService(repo fruitRepo) iFruitService {
+func NewFruitService(repo FruitRepo) FruitService {
 	return &fruitService{repo}
 }
