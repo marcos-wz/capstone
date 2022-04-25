@@ -6,10 +6,10 @@ import (
 
 // DOMAIN ***********************************************
 
-// flag for displaying debug messages
+// Debug flag for displaying debug messages
 var Debug bool
 
-type iFruitRepo interface {
+type FruitRepo interface {
 
 	// ReadFruits fruits reader repository, read all fruit records from the
 	// csv file, and guarantee csv data integrity.
@@ -27,7 +27,7 @@ type fruitRepo struct {
 	externalAPI string
 }
 
-func NewFruitRepo(file, url string) iFruitRepo {
+func NewFruitRepo(file, url string) FruitRepo {
 	return &fruitRepo{
 		filePath:    file,
 		externalAPI: url,
