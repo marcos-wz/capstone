@@ -1,22 +1,24 @@
 package server
 
 import (
-	"github.com/marcos-wz/capstone/internal/entity"
 	"github.com/marcos-wz/capstone/proto/basepb"
 	"github.com/marcos-wz/capstone/proto/filterpb"
 	"github.com/marcos-wz/capstone/proto/fruitpb"
 )
 
+var Debug bool
+
+// FruitService Mock dependency injection
+type FruitService interface {
+	GetFilteredFruits(filter *filterpb.FilterRequest) ([]*basepb.Fruit, error)
+}
+
 type server struct {
-	service fruitService
+	service FruitService
 	fruitpb.UnimplementedFruitServiceServer
 }
 
-type fruitService interface {
-	GetFilteredFruits(filter *filterpb.FilterRequest) ([]*basepb.Fruit, *entity.FruitFilterError)
-}
-
 // NewServer returns a setup server
-func NewServer(svc fruitService) *server {
+func NewServer(svc FruitService) *server {
 	return &server{service: svc}
 }
