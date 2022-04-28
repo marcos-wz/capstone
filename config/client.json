@@ -1,0 +1,5 @@
+{
+  "server-host": "localhost",
+  "server-port": 50051,
+  "debug": true
+}
