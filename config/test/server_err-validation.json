@@ -1,0 +1,7 @@
+{
+  "host": "baddomain,com",
+  "port": 0,
+  "csv-file": "./../../data/fake-file.csv",
+  "json-file": "./../../data/fake-file.json",
+  "external-api": "baddomain,com:50051/v1/externalapi/fruits"
+}
