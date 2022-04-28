@@ -21,9 +21,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FruitServiceClient interface {
-	Filter(ctx context.Context, in *filterpb.FilterRequest, opts ...grpc.CallOption) (*filterpb.FilterResponse, error)
+	Filter(ctx context.Context, in *filterpb.FilterRequest, opts ...grpc.CallOption) (FruitService_FilterClient, error)
 	Loader(ctx context.Context, in *loaderpb.LoaderRequest, opts ...grpc.CallOption) (*loaderpb.LoaderResponse, error)
-	FilterCC(ctx context.Context, in *filterccpb.FilterCCRequest, opts ...grpc.CallOption) (*filterccpb.FilterCCResponse, error)
+	FilterCC(ctx context.Context, in *filterccpb.FilterCCRequest, opts ...grpc.CallOption) (FruitService_FilterCCClient, error)
 }
 
 type fruitServiceClient struct {
@@ -34,13 +34,36 @@ func NewFruitServiceClient(cc grpc.ClientConnInterface) FruitServiceClient {
 	return &fruitServiceClient{cc}
 }
 
-func (c *fruitServiceClient) Filter(ctx context.Context, in *filterpb.FilterRequest, opts ...grpc.CallOption) (*filterpb.FilterResponse, error) {
-	out := new(filterpb.FilterResponse)
-	err := c.cc.Invoke(ctx, "/capstone.FruitService/Filter", in, out, opts...)
+func (c *fruitServiceClient) Filter(ctx context.Context, in *filterpb.FilterRequest, opts ...grpc.CallOption) (FruitService_FilterClient, error) {
+	stream, err := c.cc.NewStream(ctx, &FruitService_ServiceDesc.Streams[0], "/capstone.FruitService/Filter", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &fruitServiceFilterClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type FruitService_FilterClient interface {
+	Recv() (*filterpb.FilterResponse, error)
+	grpc.ClientStream
+}
+
+type fruitServiceFilterClient struct {
+	grpc.ClientStream
+}
+
+func (x *fruitServiceFilterClient) Recv() (*filterpb.FilterResponse, error) {
+	m := new(filterpb.FilterResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *fruitServiceClient) Loader(ctx context.Context, in *loaderpb.LoaderRequest, opts ...grpc.CallOption) (*loaderpb.LoaderResponse, error) {
@@ -52,22 +75,45 @@ func (c *fruitServiceClient) Loader(ctx context.Context, in *loaderpb.LoaderRequ
 	return out, nil
 }
 
-func (c *fruitServiceClient) FilterCC(ctx context.Context, in *filterccpb.FilterCCRequest, opts ...grpc.CallOption) (*filterccpb.FilterCCResponse, error) {
-	out := new(filterccpb.FilterCCResponse)
-	err := c.cc.Invoke(ctx, "/capstone.FruitService/FilterCC", in, out, opts...)
+func (c *fruitServiceClient) FilterCC(ctx context.Context, in *filterccpb.FilterCCRequest, opts ...grpc.CallOption) (FruitService_FilterCCClient, error) {
+	stream, err := c.cc.NewStream(ctx, &FruitService_ServiceDesc.Streams[1], "/capstone.FruitService/FilterCC", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &fruitServiceFilterCCClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type FruitService_FilterCCClient interface {
+	Recv() (*filterccpb.FilterCCResponse, error)
+	grpc.ClientStream
+}
+
+type fruitServiceFilterCCClient struct {
+	grpc.ClientStream
+}
+
+func (x *fruitServiceFilterCCClient) Recv() (*filterccpb.FilterCCResponse, error) {
+	m := new(filterccpb.FilterCCResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // FruitServiceServer is the server API for FruitService service.
 // All implementations must embed UnimplementedFruitServiceServer
 // for forward compatibility
 type FruitServiceServer interface {
-	Filter(context.Context, *filterpb.FilterRequest) (*filterpb.FilterResponse, error)
+	Filter(*filterpb.FilterRequest, FruitService_FilterServer) error
 	Loader(context.Context, *loaderpb.LoaderRequest) (*loaderpb.LoaderResponse, error)
-	FilterCC(context.Context, *filterccpb.FilterCCRequest) (*filterccpb.FilterCCResponse, error)
+	FilterCC(*filterccpb.FilterCCRequest, FruitService_FilterCCServer) error
 	mustEmbedUnimplementedFruitServiceServer()
 }
 
@@ -75,14 +121,14 @@ type FruitServiceServer interface {
 type UnimplementedFruitServiceServer struct {
 }
 
-func (UnimplementedFruitServiceServer) Filter(context.Context, *filterpb.FilterRequest) (*filterpb.FilterResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Filter not implemented")
+func (UnimplementedFruitServiceServer) Filter(*filterpb.FilterRequest, FruitService_FilterServer) error {
+	return status.Errorf(codes.Unimplemented, "method Filter not implemented")
 }
 func (UnimplementedFruitServiceServer) Loader(context.Context, *loaderpb.LoaderRequest) (*loaderpb.LoaderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Loader not implemented")
 }
-func (UnimplementedFruitServiceServer) FilterCC(context.Context, *filterccpb.FilterCCRequest) (*filterccpb.FilterCCResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FilterCC not implemented")
+func (UnimplementedFruitServiceServer) FilterCC(*filterccpb.FilterCCRequest, FruitService_FilterCCServer) error {
+	return status.Errorf(codes.Unimplemented, "method FilterCC not implemented")
 }
 func (UnimplementedFruitServiceServer) mustEmbedUnimplementedFruitServiceServer() {}
 
@@ -97,22 +143,25 @@ func RegisterFruitServiceServer(s grpc.ServiceRegistrar, srv FruitServiceServer)
 	s.RegisterService(&FruitService_ServiceDesc, srv)
 }
 
-func _FruitService_Filter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(filterpb.FilterRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _FruitService_Filter_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(filterpb.FilterRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(FruitServiceServer).Filter(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/capstone.FruitService/Filter",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FruitServiceServer).Filter(ctx, req.(*filterpb.FilterRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(FruitServiceServer).Filter(m, &fruitServiceFilterServer{stream})
+}
+
+type FruitService_FilterServer interface {
+	Send(*filterpb.FilterResponse) error
+	grpc.ServerStream
+}
+
+type fruitServiceFilterServer struct {
+	grpc.ServerStream
+}
+
+func (x *fruitServiceFilterServer) Send(m *filterpb.FilterResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _FruitService_Loader_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -133,22 +182,25 @@ func _FruitService_Loader_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FruitService_FilterCC_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(filterccpb.FilterCCRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _FruitService_FilterCC_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(filterccpb.FilterCCRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(FruitServiceServer).FilterCC(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/capstone.FruitService/FilterCC",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FruitServiceServer).FilterCC(ctx, req.(*filterccpb.FilterCCRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(FruitServiceServer).FilterCC(m, &fruitServiceFilterCCServer{stream})
+}
+
+type FruitService_FilterCCServer interface {
+	Send(*filterccpb.FilterCCResponse) error
+	grpc.ServerStream
+}
+
+type fruitServiceFilterCCServer struct {
+	grpc.ServerStream
+}
+
+func (x *fruitServiceFilterCCServer) Send(m *filterccpb.FilterCCResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 // FruitService_ServiceDesc is the grpc.ServiceDesc for FruitService service.
@@ -159,18 +211,21 @@ var FruitService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*FruitServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Filter",
-			Handler:    _FruitService_Filter_Handler,
-		},
-		{
 			MethodName: "Loader",
 			Handler:    _FruitService_Loader_Handler,
 		},
+	},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "FilterCC",
-			Handler:    _FruitService_FilterCC_Handler,
+			StreamName:    "Filter",
+			Handler:       _FruitService_Filter_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "FilterCC",
+			Handler:       _FruitService_FilterCC_Handler,
+			ServerStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "fruit.proto",
 }

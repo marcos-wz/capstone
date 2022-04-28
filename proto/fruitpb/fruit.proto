@@ -7,7 +7,7 @@ import "github.com/marcos-wz/capstone/proto/loaderpb/loader.proto";
 import "github.com/marcos-wz/capstone/proto/filterccpb/filtercc.proto";
 
 service FruitService {
-    rpc Filter(FilterRequest) returns (FilterResponse) {};
+    rpc Filter(FilterRequest) returns (stream FilterResponse) {};
     rpc Loader(LoaderRequest) returns (LoaderResponse) {};
-    rpc FilterCC(FilterCCRequest) returns (FilterCCResponse) {};
+    rpc FilterCC(FilterCCRequest) returns (stream FilterCCResponse) {};
 }
