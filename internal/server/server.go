@@ -18,7 +18,7 @@ type server struct {
 	fruitpb.UnimplementedFruitServiceServer
 }
 
-// NewServer returns a setup server
-func NewServer(svc FruitService) *server {
+// NewFruitServer returns a setup server
+func NewFruitServer(svc FruitService) *server {
 	return &server{service: svc}
 }
