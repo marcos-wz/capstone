@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -18,28 +17,25 @@ func main() {
 	servicePtr := flag.String("service", "", "Name service to be requested")
 	filterPtr := flag.String("filter", "", "Filter parameter")
 	filterValuePtr := flag.String("filter-value", "", "Filter value parameter")
-
 	flag.Parse()
 
-	// Flags Input validations, service is mandatory
+	// Flags Input validations: service is mandatory
 	if *servicePtr == "" {
 		log.Fatal("FATAL: service option is mandatory")
 	}
 
 	// Config
-	viper.SetConfigName("client")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath("./configs/")
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("fatal error config file: server \n %v", err)
+	clientConfig, err := client.LoadClientConfig("./config/client.json")
+	if err != nil {
+		log.Fatalf("FATAL: %v", err)
 	}
 
 	// Set up a connection to the server
-	addr := fmt.Sprintf("%v:%d", viper.GetString("client.host_target"), viper.GetInt("client.port"))
+	address := fmt.Sprintf("%v:%d", clientConfig.ServerHost, clientConfig.ServerPort)
 	if *debugPtr {
-		log.Printf("Connecting to %v", addr)
+		log.Printf("Connecting to %v", address)
 	}
-	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -51,7 +47,7 @@ func main() {
 	}(conn)
 
 	// Setup client
-	c := client.NewClient(conn)
+	c := client.NewFruitClient(conn)
 
 	// Run services
 	switch *servicePtr {
