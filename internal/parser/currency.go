@@ -16,7 +16,7 @@ func (*fruitParser) ParseCurrency(currency string) basepb.Currency {
 	case "USD":
 		return basepb.Currency_CURRENCY_USD
 	default:
-		log.Printf("REPO-WARNING: currency parser : currency %q undefined", currency)
+		log.Printf("PARSER-WARNING: currency parser : currency %q undefined", currency)
 		return basepb.Currency_CURRENCY_UNDEFINED
 	}
 }
