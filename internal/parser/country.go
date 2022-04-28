@@ -17,7 +17,7 @@ func (*fruitParser) ParseCountry(country string) basepb.Country {
 	case "USA":
 		return basepb.Country_COUNTRY_USA
 	default:
-		log.Printf("REPO-WARNING: country parser: country %q undefined", country)
+		log.Printf("PARSER-WARNING: country parser: country %q undefined", country)
 		return basepb.Country_COUNTRY_UNDEFINED
 	}
 }
