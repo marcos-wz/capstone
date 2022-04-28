@@ -1,10 +1,16 @@
 package parser
 
-import "github.com/marcos-wz/capstone/proto/basepb"
+import (
+	"github.com/marcos-wz/capstone/proto/basepb"
+	"github.com/marcos-wz/capstone/proto/filterpb"
+)
 
 var Debug bool
 
 type FruitParser interface {
+
+	// ParseFilter turns a valid protobuf filter
+	ParseFilter(filter string) filterpb.FiltersAllowed
 
 	// ParseUnit returns a parsed protobuf unit
 	ParseUnit(unit string) basepb.Unit
