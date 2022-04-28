@@ -4,6 +4,7 @@ import (
 	"log"
 )
 
-func (*client) FilterCC(filter, value string) {
-	log.Println("Requesting Filter Concurrent...")
+func (*fruitClient) FilterCC(filter, value string) {
+	log.Println("Filter Concurrent... starting")
+	log.Printf("Request: filter %q, value %q", filter, value)
 }
