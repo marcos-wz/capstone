@@ -1,6 +1,6 @@
 package entity
 
-// FruitCSVRecord fruit with string values, and validation rules for csv parser
+// FruitCSVRecord entity with string values, and validation rules for csv parser
 type FruitCSVRecord struct {
 	Id           string `validate:"required,numeric,ne=0"`
 	Name         string `validate:"required,printascii,gt=2"`
