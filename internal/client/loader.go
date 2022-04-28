@@ -4,6 +4,6 @@ import (
 	"log"
 )
 
-func (*client) Loader() {
+func (*fruitClient) Loader() {
 	log.Println("Requesting loader...")
 }
