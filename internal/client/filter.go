@@ -2,32 +2,41 @@ package client
 
 import (
 	"context"
+	"github.com/marcos-wz/capstone/internal/parser"
 	"github.com/marcos-wz/capstone/proto/filterpb"
+	"io"
 	"log"
-	"time"
 )
 
-func (c *client) Filter(filter, value string) {
+func (fc *fruitClient) Filter(filter, value string) {
+	log.Println("Server Streaming RPC: starting...")
 	log.Printf("Requesting Filter: %q, Value: %q ...", filter, value)
 	// Input Validation
-	filterAllowed := c.getAllowedFilter(filter)
-	if filterAllowed == filterpb.FiltersAllowed_FILTER_UNDEFINED {
+	filterPB := parser.NewFruitParser().ParseFilter(filter)
+	if filterPB == filterpb.FiltersAllowed_FILTER_UNDEFINED {
 		log.Printf("ERROR: filter %q undefined", filter)
 		return
 	}
-	// Service: contact the server and print out its response.
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	r, err := c.service.Filter(ctx, &filterpb.FilterRequest{
-		Filter: filterAllowed,
+	// Request
+	req := &filterpb.FilterRequest{
+		Filter: filterPB,
 		Value:  value,
-	})
-	if err != nil {
-		log.Printf("ERROR: could not filter: %v", err)
-		return
 	}
-
-	log.Printf("Resp Fruits: %s", r.GetFruit())
-	//log.Printf("Resp Code: %d", r.GetCode())
-	//log.Printf("Resp Fruits: %s", r.GetFruits())
+	// DO REQUEST
+	resStream, err := fc.service.Filter(context.Background(), req)
+	if err != nil {
+		log.Fatalf("error while calling filter RPC: %v", err)
+	}
+	// READ STREAMING
+	for {
+		msg, err := resStream.Recv()
+		if err == io.EOF {
+			// it reached the end of the stream
+			break
+		}
+		if err != nil {
+			log.Fatalf("error while reading filter stream: %v", err)
+		}
+		log.Printf("RPC Filter response: %v", msg.GetFruit())
+	}
 }
