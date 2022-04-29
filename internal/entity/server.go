@@ -10,4 +10,8 @@ type ServerConfig struct {
 	// DATA
 	JSONFile string `json:"json-file" validate:"required,file"`
 	CSVFile  string `json:"csv-file" validate:"required,file"`
+
+	// SSL CERTIFICATES
+	SSLCert string `json:"ssl-cert" validate:"file"`
+	SSLKey  string `json:"ssl-key" validate:"file"`
 }
