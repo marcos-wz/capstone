@@ -3,12 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"google.golang.org/grpc/credentials"
 	"log"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
 	"github.com/marcos-wz/capstone/internal/client"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -29,13 +28,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("FATAL: %v", err)
 	}
-
+	// SSL
+	creds, sslErr := credentials.NewClientTLSFromFile(clientConfig.SSLCert, "")
+	if sslErr != nil {
+		log.Fatalf("Error while loading CA trust certificate: %v", sslErr)
+	}
 	// Set up a connection to the server
 	address := fmt.Sprintf("%v:%d", clientConfig.ServerHost, clientConfig.ServerPort)
 	if *debugPtr {
 		log.Printf("Connecting to %v", address)
 	}
-	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
