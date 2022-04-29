@@ -4,5 +4,8 @@
   "csv-file": "./../../data/fruits.csv",
   "json-file": "./../../data/fruits.json",
   "external-api": "localhost:50051/v1/externalapi/fruits",
-  "debug": true
+  "debug": true,
+
+  "ssl-cert": "./../../certs/server.crt",
+  "ssl-key": "./../../certs/server.pem"
 }
