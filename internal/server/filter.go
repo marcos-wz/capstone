@@ -1,21 +1,24 @@
 package server
 
 import (
+	"fmt"
 	"github.com/marcos-wz/capstone/proto/filterpb"
 	"github.com/marcos-wz/capstone/proto/fruitpb"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"io/fs"
 	"log"
 )
 
-// Filter gets fruits filtered from the service. Only valid filters and values are allowed.
+// Filter streams filtered fruits from the filter service. Only valid filters and values are allowed.
 // PARAMS:
-// 	- filter: the field filter request - filters allowed: id, name, color, country
+// 	- filter: the filter request - filters allowed: id, name, color, country
 //	- value: the filter value request
 // RESPONSES:
-// 	- 200 Status OK: returns filter response with fruits filtered list
-//	- 422 Unprocessable Entity : returns param filter and value errors
-//	- 500 Internal Server : returns reader CSV File error (critical!)
-//	- 400 Bad Request: default errors
+// 	- returns filter response with filtered fruit
+//	- Data Loss: returns reader CSV, and fetcher JSON Files error (critical!)
+//	- Unknown: default errors
+//	- Internal: sending stream errors
 func (s *server) Filter(filterReq *filterpb.FilterRequest, stream fruitpb.FruitService_FilterServer) error {
 	if Debug {
 		log.Println("RPC Filter: starting...")
@@ -23,36 +26,20 @@ func (s *server) Filter(filterReq *filterpb.FilterRequest, stream fruitpb.FruitS
 	}
 	// SERVICE
 	fruits, err := s.service.GetFilteredFruits(filterReq)
-	// Error validations
+	// Error responses
 	if err != nil {
-		log.Printf("Error: %T - %v", err, err)
-
 		switch err.(type) {
 		case *fs.PathError:
-			log.Printf("REPO ERROR: %v", err)
-			return err
+			return status.Errorf(
+				codes.DataLoss,
+				fmt.Sprintf("Repository error file: %v", err),
+			)
 		default:
-			return err
+			return status.Errorf(
+				codes.Unknown,
+				fmt.Sprintf("%v", err),
+			)
 		}
-
-		//switch err.Type {
-		//// Repository File Error response: internal server error
-		//case "Repo.FileError":
-		//	return c.JSON(http.StatusInternalServerError, &entity.ErrorResponse{
-		//		Message: err.Error.Error(),
-		//	})
-		//// Repository parser error response : partial fruits with parser errors
-		//case "Repo.ParserError":
-		//	return c.JSON(http.StatusPartialContent, &entity.FruitFilterResponse{
-		//		Fruits:       fruits,
-		//		ParserErrors: err.ParserErrors,
-		//	})
-		//default:
-		//	// Default error response
-		//	return c.JSON(http.StatusBadRequest, &entity.ErrorResponse{
-		//		Message: err.Error.Error(),
-		//	})
-		//}
 	}
 	// Response
 	log.Printf("Fruits found: %d \n%v", len(fruits), fruits)
@@ -60,7 +47,12 @@ func (s *server) Filter(filterReq *filterpb.FilterRequest, stream fruitpb.FruitS
 		res := &filterpb.FilterResponse{Fruit: fruit}
 		err := stream.Send(res)
 		if err != nil {
-			log.Printf("ERROR: sending stream: %v", err)
+			errStream := fmt.Errorf("sending stream: %v", err)
+			log.Printf("ERROR: %v", errStream)
+			return status.Errorf(
+				codes.Internal,
+				fmt.Sprintf("%v", errStream),
+			)
 		}
 	}
 	return nil
