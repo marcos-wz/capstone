@@ -5,6 +5,7 @@ import (
 	"github.com/marcos-wz/capstone/internal/repository"
 	"github.com/marcos-wz/capstone/internal/service"
 	"github.com/marcos-wz/capstone/proto/fruitpb"
+	"google.golang.org/grpc/credentials"
 	"log"
 	"net"
 
@@ -14,12 +15,17 @@ import (
 )
 
 func main() {
+
 	// Load Config
 	serverConfig, err := server.LoadServerConfig("./config/server.json")
 	if err != nil {
 		log.Fatalf("FATAL: %v", err)
 	}
-
+	// SSL
+	creds, sslErr := credentials.NewServerTLSFromFile(serverConfig.SSLCert, serverConfig.SSLKey)
+	if sslErr != nil {
+		log.Fatalf("Failed loading certificates: %v", sslErr)
+	}
 	// Fruit repository
 	repo := repository.NewFruitRepo(serverConfig.CSVFile, serverConfig.ExternalAPI)
 	// Fruit service
@@ -33,7 +39,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	// GRPC server
-	s := grpc.NewServer()
+	s := grpc.NewServer(grpc.Creds(creds))
 	fruitpb.RegisterFruitServiceServer(s, fruitServer)
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
