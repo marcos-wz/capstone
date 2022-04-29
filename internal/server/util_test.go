@@ -17,7 +17,7 @@ func TestServer_Config(t *testing.T) {
 		{
 			"should load config file successfully",
 			"./../../config/test/server_ok.json",
-			&entity.ServerConfig{Port: 50051, Host: "", JSONFile: "./../../data/fruits.json", CSVFile: "./../../data/fruits.csv", ExternalAPI: "localhost:50051/v1/externalapi/fruits", Debug: true},
+			&entity.ServerConfig{Host: "", Port: 50051, ExternalAPI: "localhost:50051/v1/externalapi/fruits", Debug: true, JSONFile: "./../../data/fruits.json", CSVFile: "./../../data/fruits.csv", SSLCert: "./../../certs/server.crt", SSLKey: "./../../certs/server.pem"},
 			"<nil>",
 		},
 		{
@@ -30,7 +30,7 @@ func TestServer_Config(t *testing.T) {
 			"should return validation errors",
 			"./../../config/test/server_err-validation.json",
 			nil,
-			"Key: 'ServerConfig.Host' Error:Field validation for 'Host' failed on the 'hostname' tag\nKey: 'ServerConfig.Port' Error:Field validation for 'Port' failed on the 'required' tag\nKey: 'ServerConfig.ExternalAPI' Error:Field validation for 'ExternalAPI' failed on the 'url' tag\nKey: 'ServerConfig.JSONFile' Error:Field validation for 'JSONFile' failed on the 'file' tag\nKey: 'ServerConfig.CSVFile' Error:Field validation for 'CSVFile' failed on the 'file' tag",
+			"Key: 'ServerConfig.Host' Error:Field validation for 'Host' failed on the 'hostname' tag\nKey: 'ServerConfig.Port' Error:Field validation for 'Port' failed on the 'required' tag\nKey: 'ServerConfig.ExternalAPI' Error:Field validation for 'ExternalAPI' failed on the 'url' tag\nKey: 'ServerConfig.JSONFile' Error:Field validation for 'JSONFile' failed on the 'file' tag\nKey: 'ServerConfig.CSVFile' Error:Field validation for 'CSVFile' failed on the 'file' tag\nKey: 'ServerConfig.SSLCert' Error:Field validation for 'SSLCert' failed on the 'file' tag\nKey: 'ServerConfig.SSLKey' Error:Field validation for 'SSLKey' failed on the 'file' tag",
 		},
 	}
 	// ------------------------------
