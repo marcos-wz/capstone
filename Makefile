@@ -26,7 +26,7 @@ mocks:
 # Private files: ca.key, server.key, server.pem, server.crt
 # "Share" files: ca.crt (needed by the client), server.csr (needed by the CA)
 #
-# Changes these CN's to match your hosts in your environment if needed. Ex: SERVER_CN=myapi.example.com
+# Changes these CN to match your hosts in your environment if needed. Ex: SERVER_CN=myapi.example.com
 SERVER_CN=localhost
 SSL_PWD=c4pSt0n3Fru1t5
 certificates: certs config/ssl.cnf
