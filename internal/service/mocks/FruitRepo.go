@@ -60,12 +60,12 @@ func (_m *FruitRepo) ReadFruits() ([]*basepb.Fruit, error) {
 	return r0, r1
 }
 
-// WriteFruits provides a mock function with given fields: fruits
-func (_m *FruitRepo) WriteFruits(fruits []*basepb.Fruit) error {
+// WriteFruit provides a mock function with given fields: fruits
+func (_m *FruitRepo) WriteFruit(fruits *basepb.Fruit) error {
 	ret := _m.Called(fruits)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func([]*basepb.Fruit) error); ok {
+	if rf, ok := ret.Get(0).(func(*basepb.Fruit) error); ok {
 		r0 = rf(fruits)
 	} else {
 		r0 = ret.Error(0)
