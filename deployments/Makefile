@@ -6,7 +6,7 @@ IMAGE=$(DEVICE)/$(APP_NAME):$(VERSION)-$(BRANCH)
 CONTAINER=$(APP_NAME)_$(BRANCH)
 DB_NET=pg_dev
                                                               
-build: src/.ssh .env
+build: .ssh .env
 	docker build -t $(IMAGE) .
 # If the nework create fails, does not stop the commands sequence
 	docker network create --driver bridge $(CONTAINER) || true
@@ -15,7 +15,7 @@ build: src/.ssh .env
 		--rm \
 		--name $(CONTAINER)-build \
 		--mount type=volume,source=$(CONTAINER),destination=/go \
-		--mount type=bind,source=$(shell pwd)/src/.ssh,destination=/home/$(APP_NAME)/.ssh \
+		--mount type=bind,source=$(shell pwd)/.ssh,destination=/home/$(APP_NAME)/.ssh \
 		--mount type=bind,source=$(shell pwd)/build.sh,destination=/build.sh,readonly \
 		--hostname api-$(BRANCH).$(APP_NAME).$(DEVICE) \
 		$(IMAGE) /build.sh
@@ -28,7 +28,7 @@ clean:
 	docker network rm $(CONTAINER)
 	docker volume rm $(CONTAINER)
 
-run: src/.ssh .env
+run: .ssh .env
 	docker run \
 		--detach \
 		--name $(CONTAINER) \
@@ -36,7 +36,7 @@ run: src/.ssh .env
 		--env-file .env \
 		--network $(DB_NET) \
 		--mount type=volume,source=$(CONTAINER),destination=/go \
-		--mount type=bind,source=$(shell pwd)/src/.ssh,destination=/home/$(APP_NAME)/.ssh \
+		--mount type=bind,source=$(shell pwd)/.ssh,destination=/home/$(APP_NAME)/.ssh \
 		--restart unless-stopped \
 		--interactive --tty \
 		$(IMAGE) bash
