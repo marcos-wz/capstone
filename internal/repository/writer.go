@@ -2,11 +2,13 @@ package repository
 
 import (
 	pb "github.com/marcos-wz/capstone/proto/basepb"
+	"log"
 )
 
 // IMPLEMENTATION ********************************************
 
-func (*fruitRepo) WriteFruits(fruits []*pb.Fruit) error {
+func (*fruitRepo) WriteFruit(fruit *pb.Fruit) error {
+	log.Printf("REPO: write fruit: %v", fruit)
 	// f, err := os.OpenFile(csvFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	// if err != nil {
 	// 	log.Println("ERROR:", err)
@@ -15,7 +17,7 @@ func (*fruitRepo) WriteFruits(fruits []*pb.Fruit) error {
 	// defer f.Close()
 	// // Parse fruit struct to string array
 	// numFields := 10
-	// // NOTE: check if dynamic legth make sense
+	// // NOTE: check if dynamic length make sense
 	// // t := reflect.TypeOf(*fruit)
 	// // numFields := t.NumField()
 
