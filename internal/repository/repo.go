@@ -18,8 +18,8 @@ type FruitRepo interface {
 	// FetchFruits fetch data from external fruit
 	FetchFruits() ([]*pb.Fruit, error)
 
-	// WriteFruits Write new fruits records to the csv file
-	WriteFruits(fruits []*pb.Fruit) error
+	// WriteFruit Write new fruit records to a csv file
+	WriteFruit(fruit *pb.Fruit) error
 }
 
 type fruitRepo struct {
