@@ -18,7 +18,7 @@ type FruitService interface {
 type FruitRepo interface {
 	ReadFruits() ([]*basepb.Fruit, error)
 	FetchFruits() ([]*basepb.Fruit, error)
-	WriteFruits(fruits []*basepb.Fruit) error
+	WriteFruit(fruits *basepb.Fruit) error
 }
 
 type fruitService struct {
