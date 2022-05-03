@@ -10,7 +10,7 @@ var Debug bool
 
 // FruitService Mock dependency injection
 type FruitService interface {
-	GetFilteredFruits(filter *filterpb.FilterRequest) ([]*basepb.Fruit, error)
+	FilterFruits(filter *filterpb.FilterRequest) ([]*basepb.Fruit, error)
 }
 
 type server struct {

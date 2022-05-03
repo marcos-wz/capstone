@@ -9,9 +9,9 @@ var Debug bool
 
 type FruitService interface {
 
-	// GetFilteredFruits gets Filtered Fruits from the repository, refactor by filter. Repository error propagation support
+	// FilterFruits gets Filtered Fruits from the repository, refactor by filter. Repository error propagation support
 	// Param: a valid Filter. Return: List of fruits and errors.
-	GetFilteredFruits(filter *filterpb.FilterRequest) ([]*basepb.Fruit, error)
+	FilterFruits(filter *filterpb.FilterRequest) ([]*basepb.Fruit, error)
 }
 
 // FruitRepo Mock dependency injection
