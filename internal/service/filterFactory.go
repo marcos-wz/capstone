@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/marcos-wz/capstone/internal/app"
 	"github.com/marcos-wz/capstone/internal/parser"
 	"github.com/marcos-wz/capstone/proto/basepb"
 	"github.com/marcos-wz/capstone/proto/filterpb"
@@ -16,9 +17,12 @@ func filterFactory(fruits []*basepb.Fruit, filter *filterpb.FilterRequest) ([]*b
 	case filterpb.FiltersAllowed_FILTER_ID:
 		id, err := strconv.ParseUint(filter.Value, 10, 32)
 		if err != nil {
-			err := fmt.Errorf("invalid ID filter %q: %v", id, err)
-			log.Println("SVC-ERROR:", err)
-			return nil, err
+			errFruit := app.NewFruitError(
+				app.ErrSVCFilterFactoryID,
+				fmt.Sprintf("invalid ID filter %q: %v", filter.Value, err),
+			)
+			log.Println("SVC-ERROR: ", errFruit)
+			return nil, errFruit
 		}
 		return filterByID(fruits, uint32(id)), nil
 	case filterpb.FiltersAllowed_FILTER_NAME:
@@ -29,9 +33,12 @@ func filterFactory(fruits []*basepb.Fruit, filter *filterpb.FilterRequest) ([]*b
 		country := parser.NewFruitParser().ParseCountry(filter.Value)
 		return filterByCountry(fruits, country), nil
 	default:
-		err := fmt.Errorf("undefined filter(%v): %v", filter.Filter, filter.Value)
-		log.Println("ERROR Service:", err)
-		return nil, err
+		errFruit := app.NewFruitError(
+			app.ErrSVCFilterFactory,
+			fmt.Sprintf("undefined filter(%v): %v", filter.Filter, filter.Value),
+		)
+		log.Println("ERROR Service:", errFruit)
+		return nil, errFruit
 	}
 }
 
