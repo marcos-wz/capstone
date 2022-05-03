@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func (f *fruitService) GetFilteredFruits(filter *filterpb.FilterRequest) ([]*pb.Fruit, error) {
+func (f *fruitService) FilterFruits(filter *filterpb.FilterRequest) ([]*pb.Fruit, error) {
 	if Debug {
 		log.Println("SVC: GetFilteredFruits: starting...")
 	}
@@ -16,9 +16,5 @@ func (f *fruitService) GetFilteredFruits(filter *filterpb.FilterRequest) ([]*pb.
 		return nil, err
 	}
 	// Filter Fruit List
-	filteredFruits, err := filterFactory(fruits, filter)
-	if err != nil {
-		return nil, err
-	}
-	return filteredFruits, nil
+	return filterFactory(fruits, filter)
 }
