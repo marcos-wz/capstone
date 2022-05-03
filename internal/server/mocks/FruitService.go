@@ -16,8 +16,8 @@ type FruitService struct {
 	mock.Mock
 }
 
-// GetFilteredFruits provides a mock function with given fields: filter
-func (_m *FruitService) GetFilteredFruits(filter *filterpb.FilterRequest) ([]*basepb.Fruit, error) {
+// FilterFruits provides a mock function with given fields: filter
+func (_m *FruitService) FilterFruits(filter *filterpb.FilterRequest) ([]*basepb.Fruit, error) {
 	ret := _m.Called(filter)
 
 	var r0 []*basepb.Fruit
