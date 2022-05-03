@@ -1,7 +1,7 @@
 package service
 
 import (
-	"fmt"
+	"errors"
 	"github.com/marcos-wz/capstone/internal/service/mocks"
 	"github.com/marcos-wz/capstone/proto/basepb"
 	"github.com/marcos-wz/capstone/proto/filterpb"
@@ -74,14 +74,14 @@ func TestFilter_FilterFruits(t *testing.T) {
 			},
 			nil,
 		},
-		// Repository error: no such file
+		// Repository error
 		{
-			"Should return repository error, open : no such file or directory",
+			"Should return repository error",
 			&filterpb.FilterRequest{Filter: filterpb.FiltersAllowed_FILTER_ID, Value: "1"},
+			mockFruitsData,
+			errors.New("fake repo error"),
 			nil,
-			fmt.Errorf("open : no such file or directory"),
-			nil,
-			fmt.Errorf("open : no such file or directory"),
+			errors.New("fake repo error"),
 		},
 	}
 
@@ -94,7 +94,7 @@ func TestFilter_FilterFruits(t *testing.T) {
 			mock.On("ReadFruits").Return(tc.repoResponse, tc.repoErr)
 			//// SERVICE
 			service := NewFruitService(mock)
-			fruits, err := service.GetFilteredFruits(tc.filter)
+			fruits, err := service.FilterFruits(tc.filter)
 			if Debug {
 				t.Log("Total fruits:", len(fruits))
 				t.Logf("Err: %v", err)
