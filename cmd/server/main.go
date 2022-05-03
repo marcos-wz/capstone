@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/marcos-wz/capstone/internal/app"
 	"github.com/marcos-wz/capstone/internal/repository"
 	"github.com/marcos-wz/capstone/internal/service"
 	"github.com/marcos-wz/capstone/proto/fruitpb"
@@ -17,7 +18,7 @@ import (
 func main() {
 
 	// Load Config
-	serverConfig, err := server.LoadServerConfig("./config/server.json")
+	serverConfig, err := app.LoadServerConfig("./config/server.json")
 	if err != nil {
 		log.Fatalf("FATAL: %v", err)
 	}
