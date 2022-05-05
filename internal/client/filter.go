@@ -2,7 +2,7 @@ package client
 
 import (
 	"context"
-	"github.com/marcos-wz/capstone/internal/parser"
+	"github.com/marcos-wz/capstone/internal/repository"
 	"github.com/marcos-wz/capstone/proto/filterpb"
 	"io"
 	"log"
@@ -12,7 +12,7 @@ func (fc *fruitClient) Filter(filter, value string) {
 	log.Println("Server Streaming RPC: starting...")
 	log.Printf("Requesting Filter: %q, Value: %q ...", filter, value)
 	// Input Validation
-	filterPB := parser.NewFruitParser().ParseFilter(filter)
+	filterPB := repository.ParseFilter(filter)
 	if filterPB == filterpb.FiltersAllowed_FILTER_UNDEFINED {
 		log.Printf("ERROR: filter %q undefined", filter)
 		return
