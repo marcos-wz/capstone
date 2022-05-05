@@ -1,13 +1,13 @@
 package repository
 
 import (
-	pb "github.com/marcos-wz/capstone/proto/basepb"
+	"github.com/marcos-wz/capstone/proto/basepb"
 	"log"
 )
 
 // IMPLEMENTATION ********************************************
 
-func (*fruitRepo) WriteFruit(fruit *pb.Fruit) error {
+func (*fruitRepo) WriteFruit(fruit *basepb.Fruit) error {
 	log.Printf("REPO: write fruit: %v", fruit)
 	// f, err := os.OpenFile(csvFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	// if err != nil {

@@ -1,10 +1,10 @@
 package repository
 
 import (
-	pb "github.com/marcos-wz/capstone/proto/basepb"
+	"github.com/marcos-wz/capstone/proto/basepb"
 )
 
-func (*fruitRepo) FetchFruits() ([]*pb.Fruit, error) {
+func (*fruitRepo) FetchFruits() ([]*basepb.Fruit, error) {
 
-	return []*pb.Fruit{}, nil
+	return []*basepb.Fruit{}, nil
 }
