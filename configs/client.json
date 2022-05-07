@@ -1,7 +1,7 @@
 {
   "server-host": "localhost",
   "server-port": 50051,
-  "debug": true,
+  "debug-level": 1,
 
   "ssl-cert": "./certs/ca.crt"
 }
