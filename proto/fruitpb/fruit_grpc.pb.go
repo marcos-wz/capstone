@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FruitServiceClient interface {
+	// Filter returns filtered fruits list from the repository,
 	Filter(ctx context.Context, in *filterpb.FilterRequest, opts ...grpc.CallOption) (FruitService_FilterClient, error)
 	Loader(ctx context.Context, in *loaderpb.LoaderRequest, opts ...grpc.CallOption) (*loaderpb.LoaderResponse, error)
 	FilterCC(ctx context.Context, in *filterccpb.FilterCCRequest, opts ...grpc.CallOption) (FruitService_FilterCCClient, error)
@@ -111,6 +112,7 @@ func (x *fruitServiceFilterCCClient) Recv() (*filterccpb.FilterCCResponse, error
 // All implementations must embed UnimplementedFruitServiceServer
 // for forward compatibility
 type FruitServiceServer interface {
+	// Filter returns filtered fruits list from the repository,
 	Filter(*filterpb.FilterRequest, FruitService_FilterServer) error
 	Loader(context.Context, *loaderpb.LoaderRequest) (*loaderpb.LoaderResponse, error)
 	FilterCC(*filterccpb.FilterCCRequest, FruitService_FilterCCServer) error
