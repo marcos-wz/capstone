@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	config "github.com/marcos-wz/capstone/configs"
 	"google.golang.org/grpc/credentials"
 	"log"
 
@@ -24,7 +25,7 @@ func main() {
 	}
 
 	// Config
-	clientConfig, err := client.LoadClientConfig("./config/client.json")
+	clientConfig, err := config.LoadClientConfig("./configs/client.json")
 	if err != nil {
 		log.Fatalf("FATAL: %v", err)
 	}
