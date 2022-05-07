@@ -5,6 +5,8 @@ import (
 	"google.golang.org/grpc"
 )
 
+var DebugLevel uint32
+
 type FruitClient interface {
 	Filter(filter, value string)
 	Loader()
