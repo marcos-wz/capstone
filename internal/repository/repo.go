@@ -1,25 +1,23 @@
 package repository
 
 import (
-	pb "github.com/marcos-wz/capstone/proto/basepb"
+	"github.com/marcos-wz/capstone/proto/basepb"
 )
 
-// DOMAIN ***********************************************
-
-// Debug flag for displaying debug messages
-var Debug bool
+// DebugLevel flag for verbose debugging messages
+var DebugLevel uint32
 
 type FruitRepo interface {
 
 	// ReadFruits fruits reader repository, read all fruit records from the
 	// csv file, and guarantee csv data integrity.
-	ReadFruits() ([]*pb.Fruit, error)
+	ReadFruits() ([]*basepb.Fruit, error)
 
 	// FetchFruits fetch data from external fruit
-	FetchFruits() ([]*pb.Fruit, error)
+	FetchFruits() ([]*basepb.Fruit, error)
 
 	// WriteFruit Write new fruit records to a csv file
-	WriteFruit(fruit *pb.Fruit) error
+	WriteFruit(fruit *basepb.Fruit) error
 }
 
 type fruitRepo struct {
