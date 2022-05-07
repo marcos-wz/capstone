@@ -2,7 +2,7 @@ GOPATH=$(shell go env GOPATH)
 SCHEMAS_SRC=$(GOPATH)/src/github.com/marcos-wz/capstone/proto
 
 # PROTO GENERATION  *********************************************************************
-generate: proto/basepb/base.proto proto/filterpb/filter.proto proto/loaderpb/loader.proto proto/filterccpb/filtercc.proto proto/fruitpb/fruit.proto
+generate: proto proto proto proto proto
 	protoc --proto_path=$(SCHEMAS_SRC)/basepb/ --go_out=$(GOPATH)/src/ base.proto
 	protoc --proto_path=$(SCHEMAS_SRC)/filterpb/ --proto_path=$(GOPATH)/src/ --go_out=$(GOPATH)/src/ filter.proto
 	protoc --proto_path=$(SCHEMAS_SRC)/loaderpb/ --go_out=$(GOPATH)/src/ loader.proto
@@ -12,7 +12,6 @@ generate: proto/basepb/base.proto proto/filterpb/filter.proto proto/loaderpb/loa
 # MOCKS GENERATION  *********************************************************************
 mocks:
 	mockery --name=FruitRepo --srcpkg=./internal/service --output=./internal/service/mocks
-	mockery --name=FruitService --srcpkg=./internal/server --output=./internal/server/mocks
 
 
 # SSL CERTIFICATES GENERATION  **********************************************************
@@ -29,7 +28,7 @@ mocks:
 # Changes these CN to match your hosts in your environment if needed. Ex: SERVER_CN=myapi.example.com
 SERVER_CN=localhost
 SSL_PWD=c4pSt0n3Fru1t5
-certificates: certs config/ssl.cnf
+certificates: certs configs
 	openssl genrsa -passout pass:$(SSL_PWD) -des3 -out ./certs/ca.key 4096
 	openssl req -passin pass:$(SSL_PWD) -new -x509 -days 3650 -key ./certs/ca.key -out ./certs/ca.crt -subj "/CN=${SERVER_CN}"
 	openssl genrsa -passout pass:$(SSL_PWD) -des3 -out ./certs/server.key 4096
