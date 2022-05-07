@@ -1,10 +1,11 @@
 {
   "host": "",
   "port": 50051,
+  "external-api": "localhost:50051/v1/externalapi/fruits",
+  "debug-level": 0,
+
   "csv-file": "./data/fruits.csv",
   "json-file": "./data/fruits.json",
-  "external-api": "localhost:50051/v1/externalapi/fruits",
-  "debug": true,
 
   "ssl-cert": "./certs/server.crt",
   "ssl-key": "./certs/server.pem"
