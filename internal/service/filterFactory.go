@@ -2,8 +2,8 @@ package service
 
 import (
 	"fmt"
-	"github.com/marcos-wz/capstone/internal/app"
-	"github.com/marcos-wz/capstone/internal/parser"
+	"github.com/marcos-wz/capstone/internal/entity"
+	"github.com/marcos-wz/capstone/internal/repository"
 	"github.com/marcos-wz/capstone/proto/basepb"
 	"github.com/marcos-wz/capstone/proto/filterpb"
 	"log"
@@ -17,10 +17,9 @@ func filterFactory(fruits []*basepb.Fruit, filter *filterpb.FilterRequest) ([]*b
 	case filterpb.FiltersAllowed_FILTER_ID:
 		id, err := strconv.ParseUint(filter.Value, 10, 32)
 		if err != nil {
-			errFruit := app.NewFruitError(
-				app.ErrSVCFilterFactoryID,
-				fmt.Sprintf("invalid ID filter %q: %v", filter.Value, err),
-			)
+			errFruit := &entity.FruitError{
+				Type: ErrFilterFactoryID, Desc: ErrDesc[ErrFilterFactoryID], Err: err,
+			}
 			log.Println("SVC-ERROR: ", errFruit)
 			return nil, errFruit
 		}
@@ -30,21 +29,22 @@ func filterFactory(fruits []*basepb.Fruit, filter *filterpb.FilterRequest) ([]*b
 	case filterpb.FiltersAllowed_FILTER_COLOR:
 		return filterByColor(fruits, filter.Value), nil
 	case filterpb.FiltersAllowed_FILTER_COUNTRY:
-		country := parser.NewFruitParser().ParseCountry(filter.Value)
+		country := repository.ParseCountry(filter.Value)
 		return filterByCountry(fruits, country), nil
 	default:
-		errFruit := app.NewFruitError(
-			app.ErrSVCFilterFactory,
-			fmt.Sprintf("undefined filter(%v): %v", filter.Filter, filter.Value),
-		)
-		log.Println("ERROR Service:", errFruit)
+		errFruit := &entity.FruitError{
+			Type: ErrFilterFactory,
+			Desc: ErrDesc[ErrFilterFactory],
+			Err:  fmt.Errorf("undefined filter(%v): %v", filter.Filter, filter.Value),
+		}
+		log.Println("SVC-ERROR:", errFruit)
 		return nil, errFruit
 	}
 }
 
 // Return filtered fruits records by ID
 func filterByID(fruits []*basepb.Fruit, id uint32) []*basepb.Fruit {
-	if Debug {
+	if DebugLevel >= 1 {
 		log.Printf("SVC: Filtering By ID %q...", id)
 	}
 	var filterdFruits []*basepb.Fruit
@@ -58,7 +58,7 @@ func filterByID(fruits []*basepb.Fruit, id uint32) []*basepb.Fruit {
 
 //  Return filtered fruits records by Name
 func filterByName(fruits []*basepb.Fruit, name string) []*basepb.Fruit {
-	if Debug {
+	if DebugLevel >= 1 {
 		log.Printf("SVC: Filtering By NAME %q...", name)
 	}
 	var filterdFruits []*basepb.Fruit
@@ -72,7 +72,7 @@ func filterByName(fruits []*basepb.Fruit, name string) []*basepb.Fruit {
 
 //  Return filtered fruits records by Color
 func filterByColor(fruits []*basepb.Fruit, color string) []*basepb.Fruit {
-	if Debug {
+	if DebugLevel >= 1 {
 		log.Printf("SVC: Filtering by color %q...", color)
 	}
 	var filterdFruits []*basepb.Fruit
