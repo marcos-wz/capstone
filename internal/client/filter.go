@@ -9,8 +9,10 @@ import (
 )
 
 func (fc *fruitClient) Filter(filter, value string) {
-	log.Println("Server Streaming RPC: starting...")
-	log.Printf("Requesting Filter: %q, Value: %q ...", filter, value)
+	if DebugLevel >= 1 {
+		log.Println("Server Streaming RPC: starting...")
+		log.Printf("Requesting Filter: %q, Value: %q ...", filter, value)
+	}
 	// Input Validation
 	filterPB := repository.ParseFilter(filter)
 	if filterPB == filterpb.FiltersAllowed_FILTER_UNDEFINED {
