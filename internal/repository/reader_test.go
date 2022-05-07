@@ -30,23 +30,19 @@ func TestRepo_ReadFruits(t *testing.T) {
 			"Should return error `no such file or directory`",
 			"",
 			nil,
-			"open : no such file or directory",
+			"csv file error: open : no such file or directory",
 		},
 		{
 			"Should return empty fruits list, with parser error",
 			"../../data/test/csv/fruits-test-error.csv",
 			nil,
-			"<nil>",
+			"parse fruit csv record validation error: Key: 'FruitCSVRecord.Id' Error:Field validation for 'Id' failed on the 'required' tag\nKey: 'FruitCSVRecord.Unit' Error:Field validation for 'Unit' failed on the 'oneof' tag",
 		},
 		{
-			"Should return partial fruits list, with parser error",
+			"Should return empty fruits list, with parser error",
 			"../../data/test/csv/fruits-test-partial-parser-error.csv",
-			[]*basepb.Fruit{
-				{Id: 1, Name: "Pera", Description: "Fruta Tropical", Color: "green", Unit: basepb.Unit_UNIT_KG, Currency: basepb.Currency_CURRENCY_MXN, Price: 5.50, Stock: 1, CaducateDays: 1, Country: basepb.Country_COUNTRY_MEXICO, CreateTime: 1642802058, UpdateTime: 1647899658},
-				{Id: 2, Name: "Manzana", Description: "Fruta tropical", Color: "red", Unit: basepb.Unit_UNIT_KG, Currency: basepb.Currency_CURRENCY_BRL, Price: 2, Stock: 1, CaducateDays: 1, Country: basepb.Country_COUNTRY_BRAZIL, CreateTime: 1642802058, UpdateTime: 1647899658},
-				{Id: 4, Name: "Mandarina", Description: "Fruta tropical", Color: "orange", Unit: basepb.Unit_UNIT_LB, Currency: basepb.Currency_CURRENCY_CAD, Price: 20, Stock: 1, CaducateDays: 1, Country: basepb.Country_COUNTRY_CANADA, CreateTime: 1642802058, UpdateTime: 1647899658},
-			},
-			"<nil>",
+			nil,
+			"parse fruit csv record validation error: Key: 'FruitCSVRecord.Unit' Error:Field validation for 'Unit' failed on the 'oneof' tag\nKey: 'FruitCSVRecord.Currency' Error:Field validation for 'Currency' failed on the 'oneof' tag",
 		},
 	}
 	for _, tc := range testCases {
