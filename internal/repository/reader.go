@@ -2,34 +2,32 @@ package repository
 
 import (
 	"encoding/csv"
-	"github.com/marcos-wz/capstone/internal/parser"
-	pb "github.com/marcos-wz/capstone/proto/basepb"
+	"github.com/marcos-wz/capstone/internal/entity"
+	"github.com/marcos-wz/capstone/proto/basepb"
 	"io"
 	"log"
 	"os"
 )
 
-func (rp *fruitRepo) ReadFruits() ([]*pb.Fruit, error) {
-	if Debug {
+func (rp *fruitRepo) ReadFruits() ([]*basepb.Fruit, error) {
+	if DebugLevel >= 1 {
 		log.Println("ReadFruits repository starting...")
 	}
 	// File
 	f, err := os.Open(rp.filePath)
 	if err != nil {
 		log.Printf("REPO-ERROR: read fruits: %v", err)
-		return nil, err
+		return nil, &entity.FruitError{Type: ErrFileCSV, Desc: ErrDesc[ErrFileCSV], Err: err}
 	}
 	defer func(f *os.File) {
 		if err := f.Close(); err != nil {
-			log.Printf("REPO-ERROR: closing file : %v", err)
+			log.Printf("REPO-FATAL-ERROR: closing file : %v", err)
 		}
 	}(f)
 
 	// CSV
 	csvReader := csv.NewReader(f)
-	fp := parser.NewFruitParser()
-	var fruits []*pb.Fruit
-	// Load from record
+	var fruits []*basepb.Fruit
 	for {
 		record, err := csvReader.Read()
 		// End of file, returns the parsed fruit records found in file
@@ -37,10 +35,9 @@ func (rp *fruitRepo) ReadFruits() ([]*pb.Fruit, error) {
 			return fruits, nil
 		}
 		// Add parsed fruit to the list
-		fruit, err := fp.ParseFruitCSVRecord(record)
-		// NOTE: this is a lost data error, must log to a log server(Datadog)
+		fruit, err := ParseFruitRecord(record)
 		if err != nil {
-			continue
+			return nil, err
 		}
 		fruits = append(fruits, fruit)
 	}
