@@ -1,8 +1,0 @@
-{
-  "host": "",
-  "port": "50051",
-  "csv-file": "./../../data/fruits.csv",
-  "json-file": "./../../data/fruits.json",
-  "external-api": "localhost:50051/v1/externalapi/fruits",
-  "debug": "true"
-}
